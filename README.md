@@ -4,6 +4,20 @@ ProbeIQ is a real-time dental procedure coaching agent with interruptible voice 
 
 Built for the [YC Conversational AI Hackathon 2026](https://events.ycombinator.com/conversational-ai-hackathon-2026), ProbeIQ shows how a voice tutor can feel grounded, responsive, and visual instead of behaving like a generic chatbot layered on top of a video.
 
+## Architecture
+
+![ProbeIQ Architecture](./ProbeIQ%20Architecture.png)
+
+The system has four subsystems plus an offline build step:
+
+- **Offline preprocessing** — a dental video is analyzed with Qwen3-VL into structured teaching segments, and `moss_docs/` knowledge is synced into Moss semantic indexes.
+- **Browser (Next.js / React)** — video player, dynamic per-segment question chips, procedure timeline, the LiveKit voice client, and the unified tutor chat panel.
+- **Next.js API routes** — mint LiveKit tokens and dispatch the voice agent, plus a text Q&A path (`/api/ask`) that runs Moss retrieval → LLM synthesis.
+- **Python voice agent (`dental-coach`)** — a `livekit-agents` worker running the STT → LLM → TTS pipeline, with Moss-grounded tools that answer questions and drive the video over the LiveKit data channel.
+- **Cloud services** — LiveKit (real-time transport), Moss (retrieval), MiniMax (LLM + TTS), Deepgram (STT).
+
+The browser and the agent meet in a LiveKit room: the browser streams audio and video timestamps, and the agent streams back speech plus `video-control` commands (seek, pause, resume).
+
 ## Demo Flow
 
 1. A dental procedure video is analyzed into structured teaching segments.
