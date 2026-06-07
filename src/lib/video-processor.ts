@@ -9,18 +9,23 @@ const STAGES: ProcessingStage[] = [
   "ready",
 ];
 
+// TODO: replace with real frame analysis (Gemini Flash / GPT-4V over extracted frames)
+// Each stub doc should also be upserted to Moss index `video_{videoId}` with
+// metadata {type:"frame", t:timestampSec} so the voice agent can retrieve them.
 const STUB_PLAYS: Play[] = [
   {
-    id: "play-1",
+    id: "frame-1",
     timestampSec: 42,
-    label: "Pick and roll",
-    description: "Ball handler draws the hedge, short roll creates a 4-on-3.",
+    label: "Isolation and retraction",
+    description:
+      "Practitioner applies rubber dam and retractors to isolate the operative field before instrumentation.",
   },
   {
-    id: "play-2",
+    id: "frame-2",
     timestampSec: 118,
-    label: "Backdoor cut",
-    description: "Weak-side defender overhelps, cutter times the pass for a layup.",
+    label: "Suction and debridement",
+    description:
+      "High-volume suction clears debris and irrigation fluid prior to the final preparation step.",
   },
 ];
 

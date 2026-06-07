@@ -37,6 +37,17 @@ yarn-error.log*
 # uploaded videos (local dev)
 /uploads
 
+# Python agent
+agent/.venv/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Claude Code internals
+.claude/
+.agents/
+skills-lock.json
+
 # vercel
 .vercel
 

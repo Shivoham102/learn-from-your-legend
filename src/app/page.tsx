@@ -6,7 +6,8 @@ import { VideoUpload } from "@/components/VideoUpload";
 import { VoiceAgent } from "@/components/VoiceAgent";
 
 export default function Home() {
-  const [videoId, setVideoId] = useState<string | null>(null);
+  // TODO: remove hardcoded videoId after upload flow is tested
+  const [videoId, setVideoId] = useState<string | null>("test-room-1");
   const [filename, setFilename] = useState<string | null>(null);
 
   function handleUploaded(id: string, name: string) {
@@ -22,12 +23,12 @@ export default function Home() {
             Learn from your legend
           </p>
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">
-            Upload film. Ask why the play happened.
+            Upload a procedure. Ask why each action was taken.
           </h1>
           <p className="max-w-2xl text-base text-zinc-600">
-            A lightweight wrapper around sports video analysis and a voice coach.
-            Upload a clip, let it process, and talk through specific plays while
-            you wait — with a hook for sports-telegrams.dklhub context later.
+            Upload a dental or medical procedure film. While it processes, talk
+            with a voice agent about your learning goals. Once ready, ask about
+            any specific moment or technique in the video.
           </p>
         </div>
       </header>

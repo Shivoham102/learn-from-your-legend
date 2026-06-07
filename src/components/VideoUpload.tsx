@@ -57,10 +57,10 @@ export function VideoUpload({ onUploaded }: VideoUploadProps) {
       className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm"
     >
       <div>
-        <h2 className="text-lg font-semibold text-zinc-900">Upload game film</h2>
+        <h2 className="text-lg font-semibold text-zinc-900">Upload procedure film</h2>
         <p className="mt-1 text-sm text-zinc-600">
-          Drop a clip while processing runs. You can ask about specific plays
-          right away.
+          Drop a clip while processing runs. You can ask the voice agent about
+          any moment or technique right away.
         </p>
       </div>
 
