@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 
 from dotenv import load_dotenv
 from pathlib import Path
@@ -36,8 +37,16 @@ from livekit.agents import (
 from livekit import rtc
 from livekit.agents import llm as _lk_llm
 from livekit.plugins import deepgram, minimax, silero
+from livekit.plugins.minimax import llm as _mm_llm
+
+try:
+    from moss import MossClient, QueryOptions
+except ImportError:  # optional dependency — search_video degrades gracefully
+    MossClient = None
+    QueryOptions = None
 
 VIDEO_CONTROL_TOPIC = "video-control"
+MOSS_INDEX_NAME = "dental_procedure"
 
 
 class _TolerantCompletionUsage(_lk_llm.CompletionUsage):
@@ -56,7 +65,53 @@ class _TolerantCompletionUsage(_lk_llm.CompletionUsage):
 # `from livekit.agents import llm` then `llm.CompletionUsage(...)`).
 _lk_llm.CompletionUsage = _TolerantCompletionUsage
 
+
+# MiniMax rejects a tool call whose arguments are an empty string ("invalid
+# function arguments json string"). No-argument tools (e.g. get_current_segment)
+# serialize as "", so coerce empty tool-call arguments to "{}" before each request.
+_orig_to_chat_ctx = _mm_llm.to_chat_ctx
+
+
+def _patched_to_chat_ctx(chat_ctx, cache_key):
+    msgs = _orig_to_chat_ctx(chat_ctx, cache_key)
+    for m in msgs:
+        tool_calls = m.get("tool_calls") if isinstance(m, dict) else None
+        for tc in tool_calls or []:
+            fn = tc.get("function") if isinstance(tc, dict) else None
+            if isinstance(fn, dict) and not (fn.get("arguments") or "").strip():
+                fn["arguments"] = "{}"
+    return msgs
+
+
+_mm_llm.to_chat_ctx = _patched_to_chat_ctx
+
 logger = logging.getLogger("dental-agent")
+
+# MiniMax sometimes emits tool-call syntax as plain text instead of executing function calls.
+# Strip it before TTS via tts_text_transforms (runs first, before filter_markdown).
+_FUNC_CALL_LINE_RE = re.compile(r"functions\.\w+\s*\(")
+
+
+async def _strip_leaked_calls(text):
+    """Remove fenced code blocks and function-call lines from the LLM token stream."""
+    buffer = ""
+    in_code_block = False
+    async for chunk in text:
+        buffer += chunk
+        while "\n" in buffer:
+            line, buffer = buffer.split("\n", 1)
+            stripped = line.strip()
+            if stripped.startswith("```"):
+                in_code_block = not in_code_block
+                continue  # drop the fence line itself
+            if in_code_block:
+                continue  # drop code block content
+            if _FUNC_CALL_LINE_RE.search(line):
+                continue  # drop bare function-call lines
+            yield line + "\n"
+    if buffer:
+        if not in_code_block and not _FUNC_CALL_LINE_RE.search(buffer) and not buffer.strip().startswith("```"):
+            yield buffer
 
 _SEGMENTS_PATH = Path(__file__).parent.parent / "Speeden root canal 1.5.json"
 
@@ -95,27 +150,29 @@ def _find_segment(time_s: float) -> dict | None:
 
 INSTRUCTIONS = """You are a dental procedure study assistant for a voice conversation.
 
-Your audience is dental students. Do not ask about their background — assume they are students.
+Your audience is dental students. Do not ask about their background.
 
-STYLE — this matters most:
-- Be concise and direct. Answer in 1-2 short sentences. No fluff, no filler, no preamble.
-- Do not restate the question or add pleasantries. Get to the point.
-- Speak plainly; expand only if the user asks for more detail.
-- This is spoken aloud. Never use lists, bullet points, or numbered steps — they get read out as
-  "one, two, three". Always answer in plain flowing sentences.
-- Never mention timestamps, seconds, or "the X-second mark". Use get_current_segment() to know what
-  is on screen, but describe what is happening, not when. The viewer can already see the time.
+OUTPUT RULES — non-negotiable:
+This is a voice conversation. Your text goes directly to a text-to-speech engine.
+NEVER output code, function calls, JSON, markdown, bullet points, numbered lists, or backticks.
+They will be spoken aloud verbatim and sound completely broken to the listener.
+NEVER write things like "functions.search_video(...)" or backtick code blocks — call tools silently
+and speak only the plain-English answer.
+Always answer in plain flowing sentences only.
 
-Tools:
-- get_current_segment(): call FIRST when the user asks what is happening on screen now, what step is
-  being performed, or what instruments or anatomy are involved. Tells you the current procedure segment.
-- check_video_status(): whether the video has finished processing.
-- search_video(): call before answering any question about a specific moment or technique.
+STYLE:
+Concise and direct. 1-2 sentences. No fluff, no preamble, no restating the question.
+Never mention timestamps, seconds, or "the X-second mark". Describe what is happening, not when.
 
-Video controls — call when asked:
-- play_video() / pause_video()
-- rewind_video(seconds) / forward_video(seconds) (default 10)
-- seek_video(timestamp): jump to an absolute time in seconds."""
+TOOLS — always call silently, never write them in your response:
+get_current_segment(): call FIRST when asked what is on screen now, what step, what instruments,
+or what anatomy is involved.
+search_video(query): call before answering any question about a technique, instrument, material,
+or why a step is done. Use this for all knowledge questions.
+seek_to_segment(name): use this — not rewind_video — when the user mentions a section or step by
+name (e.g. "decay removal", "rubber dam", "obturation"). It finds the exact start from the JSON.
+check_video_status(): check if video finished processing.
+play_video() / pause_video() / rewind_video(seconds) / forward_video(seconds) / seek_video(timestamp)"""
 
 
 class DentalAgent(Agent):
@@ -124,12 +181,13 @@ class DentalAgent(Agent):
         self._video_id = video_id
         self._current_time_s: float = 0.0
         self._next_url = os.environ.get("NEXT_URL", "http://localhost:3000")
-        moss_key = os.environ.get("MOSS_API_KEY", "")
-        if moss_key and moss_key != "xxx":
-            import moss
-            self._moss_index = moss.Index(api_key=moss_key, index=f"video_{video_id}")
+        project_id = os.environ.get("MOSS_PROJECT_ID", "")
+        project_key = os.environ.get("MOSS_PROJECT_KEY", "")
+        if MossClient and project_id and project_key:
+            self._moss = MossClient(project_id, project_key)
         else:
-            self._moss_index = None
+            self._moss = None
+        self._moss_loaded = False
 
     def update_timestamp(self, ts: float) -> None:
         self._current_time_s = ts
@@ -207,6 +265,36 @@ class DentalAgent(Agent):
         return f"Jumped to {timestamp:g} seconds."
 
     @function_tool()
+    async def seek_to_segment(self, name: str) -> str:
+        """Jump to a named procedure segment using the exact start time from the JSON.
+        Use this — not rewind_video — whenever the user mentions a section, step, or phase by name
+        (e.g. 'decay removal', 'rubber dam', 'obturation', 'onlay prep').
+        Matches against step_name, phase, and context fields."""
+        query = name.lower()
+        query_words = set(query.split())
+
+        best_seg = None
+        best_score = -1
+        for seg in _PROCEDURE_SEGMENTS:
+            haystack = " ".join([
+                seg.get("step_name", ""),
+                seg.get("phase", ""),
+                seg.get("context", ""),
+            ]).lower()
+            hay_words = set(haystack.split())
+            score = len(query_words & hay_words)
+            if score > best_score:
+                best_score = score
+                best_seg = seg
+
+        if not best_seg or best_score == 0:
+            return f"No segment matched '{name}'. Available: {', '.join(s.get('step_name','') for s in _PROCEDURE_SEGMENTS)}"
+
+        start_s = _mm_ss_to_s(best_seg.get("start", "0:00"))
+        await self._send_video_command({"action": "seek", "timestamp": start_s})
+        return f"Jumped to '{best_seg.get('step_name')}' (starts at {best_seg.get('start')})."
+
+    @function_tool()
     async def check_video_status(self) -> str:
         """Check whether the dental procedure video has finished processing."""
         async with httpx.AsyncClient() as client:
@@ -225,39 +313,25 @@ class DentalAgent(Agent):
 
     @function_tool()
     async def search_video(self, query: str) -> str:
-        """Search the dental procedure video content for context relevant to a question.
-        Always call this before answering questions about specific moments or techniques."""
-        if self._moss_index is None:
-            return "Video search index not configured yet."
+        """Search the dental knowledge base (instruments, materials, anatomy, terms,
+        procedure steps, clinical rationale, common student questions) for context
+        relevant to a question. Call before answering questions about techniques,
+        instruments, materials, anatomy, or why a step is done."""
+        if self._moss is None:
+            return "Knowledge base not configured."
         try:
-            results = self._moss_index.query(query, k=5)
-            if not results:
-                return "No relevant content found yet — the video may still be processing."
-            return "\n".join(
-                f"[{r.metadata.get('t', '?')}s] {r.text}" for r in results
+            if not self._moss_loaded:
+                await self._moss.load_index(MOSS_INDEX_NAME)
+                self._moss_loaded = True
+            result = await self._moss.query(
+                MOSS_INDEX_NAME, query, QueryOptions(top_k=5)
             )
+            if not result.docs:
+                return "No relevant information found."
+            return "\n".join(f"- {doc.text}" for doc in result.docs)
         except Exception as exc:
             logger.error("Moss query error: %s", exc)
-            return f"Could not retrieve video context: {exc}"
-
-    @function_tool()
-    async def save_user_intent(self, summary: str) -> str:
-        """Save a summary of the user's background and learning goals so they inform
-        later answers. Call once you know who the user is and what they want to learn."""
-        if self._moss_index is None:
-            logger.info("Moss not configured; intent not persisted: %s", summary)
-            return "Intent noted (search index not configured)."
-        try:
-            self._moss_index.upsert(
-                id="user_intent",
-                text=summary,
-                metadata={"type": "intent"},
-            )
-            logger.info("User intent saved: %s", summary)
-            return "Intent saved."
-        except Exception as exc:
-            logger.error("Moss upsert error: %s", exc)
-            return f"Could not save intent: {exc}"
+            return f"Could not retrieve knowledge: {exc}"
 
 
 async def entrypoint(ctx: JobContext) -> None:
@@ -287,6 +361,7 @@ async def entrypoint(ctx: JobContext) -> None:
         ),
         tts=minimax.TTS(model="speech-02-turbo", voice_id="presenter_female", sample_rate=24000),
         vad=silero.VAD.load(),
+        tts_text_transforms=[_strip_leaked_calls, "filter_markdown"],
     )
 
     await session.start(agent, room=ctx.room)

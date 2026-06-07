@@ -4,4 +4,4 @@ livekit-plugins-minimax
 livekit-plugins-silero
 httpx
 python-dotenv
-# moss  # uncomment when MOSS_API_KEY is configured
+moss  # semantic search; needs MOSS_PROJECT_ID + MOSS_PROJECT_KEY in .env
