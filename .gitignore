@@ -39,6 +39,9 @@ agent/.venv/
 *.pyc
 *.pyo
 
+# Large local video assets (too big for GitHub — place your own copy locally)
+public/videos/*.mp4
+
 # Claude Code internals
 .claude/
 .agents/

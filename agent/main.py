@@ -33,41 +33,96 @@ from livekit.agents import (
     function_tool,
     get_job_context,
 )
+from livekit import rtc
+from livekit.agents import llm as _lk_llm
 from livekit.plugins import deepgram, minimax, silero
 
 VIDEO_CONTROL_TOPIC = "video-control"
 
+
+class _TolerantCompletionUsage(_lk_llm.CompletionUsage):
+    """MiniMax streams a trailing usage chunk with null token counts, which the
+    stock plugin feeds straight into CompletionUsage (int fields) and crashes
+    pydantic. Coerce the null counts to 0 so the stream completes."""
+
+    def __init__(self, **data):
+        for _k in ("completion_tokens", "prompt_tokens", "total_tokens"):
+            if data.get(_k) is None:
+                data[_k] = 0
+        super().__init__(**data)
+
+
+# Patch the class the minimax plugin resolves at call time (it does
+# `from livekit.agents import llm` then `llm.CompletionUsage(...)`).
+_lk_llm.CompletionUsage = _TolerantCompletionUsage
+
 logger = logging.getLogger("dental-agent")
 
-INSTRUCTIONS = """You are a warm, knowledgeable dental education assistant.
+_SEGMENTS_PATH = Path(__file__).parent.parent / "Speeden root canal 1.5.json"
 
-When the user first joins:
-1. Greet them and ask about their background (dental student, resident, practicing clinician, or patient?)
-2. Ask what they hope to learn from this procedure video
-3. Ask if they have any specific questions already in mind
-Call save_user_intent() once you have a clear picture of their goals.
 
-You have these tools to use throughout the session:
-- check_video_status(): call this to see whether the video has finished processing
-- search_video(): call this before answering any question about a specific moment or technique
+def _load_segments() -> list[dict]:
+    try:
+        return json.loads(_SEGMENTS_PATH.read_text(encoding="utf-8")).get("segments", [])
+    except Exception as exc:
+        logger.warning("Could not load procedure segments: %s", exc)
+        return []
 
-Video playback controls — call these whenever the user asks you to control the video:
-- play_video(): when they say "play", "resume", or "continue"
-- pause_video(): when they say "pause", "stop", or "hold on"
-- rewind_video(seconds): when they say "go back" or "rewind" (default 10 seconds)
-- forward_video(seconds): when they say "skip ahead" or "forward" (default 10 seconds)
-- seek_video(timestamp): when they say "jump to 42 seconds" or "go to one minute" (timestamp in seconds)
 
-Once the video is ready, switch to Q&A mode. Always call search_video() before answering procedure
-questions, and cite the timestamp in your response (e.g. "At 42 seconds...").
+_PROCEDURE_SEGMENTS = _load_segments()
 
-Keep all responses concise — this is a voice conversation."""
+
+def _mm_ss_to_s(ts: str) -> float:
+    try:
+        m, s = ts.split(":")
+        return int(m) * 60 + int(s)
+    except (ValueError, IndexError):
+        return 0.0
+
+
+def _find_segment(time_s: float) -> dict | None:
+    """Return the segment covering time_s; fall back to last segment at/past video end."""
+    last = None
+    for seg in _PROCEDURE_SEGMENTS:
+        start = _mm_ss_to_s(seg.get("start", "0:00"))
+        end = _mm_ss_to_s(seg.get("end", "0:00"))
+        if start <= time_s < end:
+            return seg
+        if start <= time_s:
+            last = seg
+    return last
+
+
+INSTRUCTIONS = """You are a dental procedure study assistant for a voice conversation.
+
+Your audience is dental students. Do not ask about their background — assume they are students.
+
+STYLE — this matters most:
+- Be concise and direct. Answer in 1-2 short sentences. No fluff, no filler, no preamble.
+- Do not restate the question or add pleasantries. Get to the point.
+- Speak plainly; expand only if the user asks for more detail.
+- This is spoken aloud. Never use lists, bullet points, or numbered steps — they get read out as
+  "one, two, three". Always answer in plain flowing sentences.
+- Never mention timestamps, seconds, or "the X-second mark". Use get_current_segment() to know what
+  is on screen, but describe what is happening, not when. The viewer can already see the time.
+
+Tools:
+- get_current_segment(): call FIRST when the user asks what is happening on screen now, what step is
+  being performed, or what instruments or anatomy are involved. Tells you the current procedure segment.
+- check_video_status(): whether the video has finished processing.
+- search_video(): call before answering any question about a specific moment or technique.
+
+Video controls — call when asked:
+- play_video() / pause_video()
+- rewind_video(seconds) / forward_video(seconds) (default 10)
+- seek_video(timestamp): jump to an absolute time in seconds."""
 
 
 class DentalAgent(Agent):
     def __init__(self, video_id: str) -> None:
         super().__init__(instructions=INSTRUCTIONS)
         self._video_id = video_id
+        self._current_time_s: float = 0.0
         self._next_url = os.environ.get("NEXT_URL", "http://localhost:3000")
         moss_key = os.environ.get("MOSS_API_KEY", "")
         if moss_key and moss_key != "xxx":
@@ -76,10 +131,29 @@ class DentalAgent(Agent):
         else:
             self._moss_index = None
 
+    def update_timestamp(self, ts: float) -> None:
+        self._current_time_s = ts
+
+    @function_tool()
+    async def get_current_segment(self) -> str:
+        """Return the procedure segment currently on screen based on the video timestamp.
+        Call this before answering any question about what is happening right now."""
+        seg = _find_segment(self._current_time_s)
+        if not seg:
+            return f"No segment data available (timestamp {self._current_time_s:.1f}s)"
+        return json.dumps({
+            "timestamp_s": self._current_time_s,
+            "step": seg.get("step_name"),
+            "phase": seg.get("phase"),
+            "context": seg.get("context"),
+            "instruments": seg.get("instruments", []),
+            "anatomy": seg.get("anatomy", []),
+            "materials": seg.get("materials", []),
+        })
+
     async def on_enter(self) -> None:
         await self.session.say(
-            "Hi! I'm your dental procedure assistant. "
-            "Are you a student, resident, or clinician?",
+            "Hi, I'm your dental study assistant. Ask me anything as you watch.",
             allow_interruptions=True,
         )
 
@@ -193,6 +267,16 @@ async def entrypoint(ctx: JobContext) -> None:
     next_url = os.environ.get("NEXT_URL", "http://localhost:3000")
 
     agent = DentalAgent(video_id=video_id)
+
+    @ctx.room.on("data_received")
+    def on_data(data_packet: rtc.DataPacket) -> None:
+        try:
+            payload = json.loads(data_packet.data.decode())
+            if payload.get("type") == "video_timestamp":
+                agent.update_timestamp(float(payload["ts"]))
+        except Exception:
+            pass
+
     session = AgentSession(
         stt=deepgram.STT(model="nova-3", language="en-US"),
         llm=minimax.LLM(
