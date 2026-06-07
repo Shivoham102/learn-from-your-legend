@@ -1,0 +1,43 @@
+
+> learn-from-your-legend@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.7 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://10.5.0.2:3000
+- Environments: .env
+✓ Ready in 1266ms
+Creating turbopack project {
+  dir: 'C:\\Users\\amogh\\Desktop\\learn-from-your-legend',
+  testMode: true
+}
+
+○ Compiling / ...
+ GET / 200 in 4.5s (next.js: 4.1s, application-code: 434ms)
+ GET /api/livekit/status 200 in 483ms (next.js: 453ms, application-code: 30ms)
+ GET /api/moss/status 200 in 1439ms (next.js: 597ms, application-code: 842ms)
+  Reload env: .env
+  Reload env: .env
+  Reload env: .env
+  Reload env: .env
+  Reload env: .env
+  Reload env: .env
+ GET / 200 in 720ms (next.js: 286ms, application-code: 434ms)
+ GET /videos/dental-procedure-demo.mp4 404 in 780ms (next.js: 675ms, application-code: 104ms)
+ GET /api/livekit/token?videoId=dental-tutor-room&identity=student 200 in 860ms (next.js: 833ms, application-code: 27ms)
+[dispatch] new room, dispatching
+[dispatch] created: dental-coach
+ GET / 200 in 99ms (next.js: 6ms, application-code: 93ms)
+ GET /api/livekit/token?videoId=dental-tutor-room&identity=student 200 in 24ms (next.js: 7ms, application-code: 16ms)
+[dispatch] room=dental-tutor-room participants=1 hasAgent=true
+ POST /api/ask 200 in 6.6s (next.js: 199ms, application-code: 6.4s)
+ GET / 200 in 98ms (next.js: 7ms, application-code: 92ms)
+ GET /api/livekit/token?videoId=dental-tutor-room&identity=student 200 in 22ms (next.js: 7ms, application-code: 16ms)
+[dispatch] room=dental-tutor-room participants=1 hasAgent=true
+✓ Compiled in 82ms
+ GET /api/livekit/token?videoId=dental-tutor-room&identity=student 200 in 196ms (next.js: 162ms, application-code: 33ms)
+ GET / 200 in 539ms (next.js: 191ms, application-code: 348ms)
+ GET / 200 in 287ms (next.js: 201ms, application-code: 86ms)
+ GET / 200 in 54ms (next.js: 5ms, application-code: 48ms)
+[dispatch] room=dental-tutor-room participants=1 hasAgent=true
+[?25h

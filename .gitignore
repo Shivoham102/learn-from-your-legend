@@ -53,3 +53,6 @@ skills-lock.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+video_processing\dental_gemini_video.py
+video_processing\video_understanding.ipynb

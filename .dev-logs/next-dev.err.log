@@ -1,0 +1,114 @@
+[browser] NegotiationError: cannot negotiate on closed engine
+    at Generator.next (<anonymous>)
+    at new Promise (<anonymous>)
+    at new Promise (<anonymous>)
+    at Generator.next (<anonymous>)
+    at new Promise (<anonymous>)
+    at Generator.next (<anonymous>)
+    at new Promise (<anonymous>)
+    at Generator.next (<anonymous>)
+    at new Promise (<anonymous>)
+    at Generator.next (<anonymous>)
+    at new Promise (<anonymous>)
+    at Generator.next (<anonymous>)
+    at new Promise (<anonymous>)
+    at VoiceSection.useEffect.id (components/VoiceAgent.tsx:57:10)
+  55 |     const id = setInterval(() => {
+  56 |       localParticipant
+> 57 |         .publishData(
+     |          ^
+  58 |           enc.encode(JSON.stringify({ type: "video_timestamp", ts: currentTimeRef.current ...
+  59 |           { reliable: false },
+  60 |         ) {
+  participant: [90mundefined[39m,
+  participantID: [90mundefined[39m,
+  room: [90mundefined[39m,
+  roomID: [90mundefined[39m
+}
+[browser] could not playback audio {
+  error: [32m'[object DOMException]'[39m,
+  participant: [32m'student'[39m,
+  participantID: [32m'PA_bmVKV2etCgUX'[39m,
+  room: [32m'dental-tutor-room'[39m,
+  roomID: [32m'RM_V2FLTXMKStUf'[39m
+}
+[browser] could not playback audio {
+  error: [32m'[object DOMException]'[39m,
+  participant: [32m'student'[39m,
+  participantID: [32m'PA_bmVKV2etCgUX'[39m,
+  room: [32m'dental-tutor-room'[39m,
+  roomID: [32m'RM_V2FLTXMKStUf'[39m
+}
+[browser] could not playback audio {
+  error: [32m'[object DOMException]'[39m,
+  participant: [32m'student'[39m,
+  participantID: [32m'PA_dDBEbLyCzRJq'[39m,
+  room: [32m'dental-tutor-room'[39m,
+  roomID: [32m'RM_V2FLTXMKStUf'[39m
+}
+[browser] could not playback audio {
+  error: [32m'[object DOMException]'[39m,
+  participant: [32m'student'[39m,
+  participantID: [32m'PA_dDBEbLyCzRJq'[39m,
+  room: [32m'dental-tutor-room'[39m,
+  roomID: [32m'RM_V2FLTXMKStUf'[39m
+}
+[Moss] loadIndex("tooth_condition_images") failed — using cloud fallback: [Error: Cloud error: Index not found: tooth_condition_images ({"error":"INDEX_NOT_FOUND","message":"Index not found","statusCode":404})] {
+  code: 'GenericFailure'
+}
+[Moss] loadIndex("procedure_moments") failed — using cloud fallback: [Error: Cloud error: Index not found: procedure_moments ({"error":"INDEX_NOT_FOUND","message":"Index not found","statusCode":404})] {
+  code: 'GenericFailure'
+}
+[Moss] loadIndex("dental_terminology") failed — using cloud fallback: [Error: Cloud error: Index not found: dental_terminology ({"error":"INDEX_NOT_FOUND","message":"Index not found","statusCode":404})] {
+  code: 'GenericFailure'
+}
+[Moss] Query failed for "tooth_condition_images": Error: Cloud query request failed: HTTP error! status: 503
+    at async queryIndex (lib\moss.ts:70:22)
+    at async queryToothConditions (lib\moss.ts:238:16)
+    at async generateDentalContext (lib\moss.ts:257:51)
+    at async POST (app\api\ask\route.ts:22:21)
+  68 |   if (isMossConfigured()) {
+  69 |     try {
+> 70 |       const result = await queryMossIndex(indexName, question, topK);
+     |                      ^
+  71 |       return result.docs.map((doc) => ({
+  72 |         id: doc.id,
+  73 |         text: doc.text,
+[Moss] Query failed for "dental_terminology": Error: Cloud query request failed: HTTP error! status: 503
+    at async queryIndex (lib\moss.ts:70:22)
+    at async queryDentalKnowledge (lib\moss.ts:230:16)
+    at async generateDentalContext (lib\moss.ts:257:51)
+    at async POST (app\api\ask\route.ts:22:21)
+  68 |   if (isMossConfigured()) {
+  69 |     try {
+> 70 |       const result = await queryMossIndex(indexName, question, topK);
+     |                      ^
+  71 |       return result.docs.map((doc) => ({
+  72 |         id: doc.id,
+  73 |         text: doc.text,
+[Moss] Query failed for "procedure_moments": Error: Cloud query request failed: HTTP error! status: 503
+    at async queryIndex (lib\moss.ts:70:22)
+    at async queryProcedureMoments (lib\moss.ts:246:16)
+    at async generateDentalContext (lib\moss.ts:257:51)
+    at async POST (app\api\ask\route.ts:22:21)
+  68 |   if (isMossConfigured()) {
+  69 |     try {
+> 70 |       const result = await queryMossIndex(indexName, question, topK);
+     |                      ^
+  71 |       return result.docs.map((doc) => ({
+  72 |         id: doc.id,
+  73 |         text: doc.text,
+[browser] could not playback audio {
+  error: [32m'[object DOMException]'[39m,
+  participant: [32m'student'[39m,
+  participantID: [32m'PA_YLatVPc3enSH'[39m,
+  room: [32m'dental-tutor-room'[39m,
+  roomID: [32m'RM_V2FLTXMKStUf'[39m
+}
+[browser] could not playback audio {
+  error: [32m'[object DOMException]'[39m,
+  participant: [32m'student'[39m,
+  participantID: [32m'PA_YLatVPc3enSH'[39m,
+  room: [32m'dental-tutor-room'[39m,
+  roomID: [32m'RM_V2FLTXMKStUf'[39m
+}
