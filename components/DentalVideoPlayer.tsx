@@ -24,6 +24,8 @@ export interface DentalVideoPlayerHandle {
   getCurrentTime: () => number;
   rewind: (seconds?: number) => void;
   forward: (seconds?: number) => void;
+  /** Raw element so the video-control adapter can drive it directly. */
+  getVideoElement: () => HTMLVideoElement | null;
 }
 
 interface DentalVideoPlayerProps {
@@ -79,6 +81,7 @@ const DentalVideoPlayer = forwardRef<
         const base = videoRef.current?.currentTime ?? currentTime;
         applyTime(base + seconds);
       },
+      getVideoElement: () => videoRef.current,
     }),
     [applyTime, currentTime]
   );

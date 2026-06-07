@@ -4,21 +4,29 @@ import { useCallback, useEffect, useState } from "react";
 import {
   LiveKitRoom,
   RoomAudioRenderer,
+  useConnectionState,
+  useDataChannel,
   useLocalParticipant,
   useTranscriptions,
   useVoiceAssistant,
 } from "@livekit/components-react";
+import { ConnectionState } from "livekit-client";
 import "@livekit/components-styles";
 import VoiceOrb, { type VoiceOrbState } from "./VoiceOrb";
+import {
+  parseVideoCommand,
+  VIDEO_CONTROL_TOPIC,
+  type VideoCommand,
+} from "@/lib/videoControl";
 
 type ConnectionInfo = {
   token: string;
   serverUrl: string;
 };
 
-function resolveOrbState(agentState: string, pttActive: boolean): VoiceOrbState {
-  if (pttActive) return "user-speaking";
+function resolveOrbState(agentState: string, micEnabled: boolean): VoiceOrbState {
   if (agentState === "speaking") return "ai-speaking";
+  if (micEnabled) return "user-speaking";
   return "listening";
 }
 
@@ -26,28 +34,44 @@ export type VoiceTurn = { text: string; isAgent: boolean };
 
 function VoiceSection({
   onTurnsChange,
+  onVideoControl,
 }: {
   onTurnsChange?: (turns: VoiceTurn[]) => void;
+  onVideoControl?: (command: VideoCommand) => void;
 }) {
   const { state } = useVoiceAssistant();
   const { localParticipant } = useLocalParticipant();
+  const connectionState = useConnectionState();
+  const isConnected = connectionState === ConnectionState.Connected;
   const allTranscriptions = useTranscriptions();
-  const [pttActive, setPttActive] = useState(false);
+  // Always-listening: the mic turns on as soon as the room is connected. The orb
+  // toggles mute, but speaking does not require holding the button (no PTT).
+  const [micEnabled, setMicEnabled] = useState(true);
 
-  const handleOrbClick = useCallback(async () => {
-    const next = !pttActive;
-    setPttActive(next);
-    await localParticipant.setMicrophoneEnabled(next);
-  }, [pttActive, localParticipant]);
-
-  // Reset PTT when agent starts speaking (agent has the floor)
+  // Enable the mic only once the engine is actually connected — publishing the
+  // track before then throws "engine not connected within timeout".
   useEffect(() => {
-    if (state === "speaking" && pttActive) {
-      setPttActive(false);
-      localParticipant.setMicrophoneEnabled(false).catch(() => {});
+    if (isConnected && micEnabled) {
+      localParticipant.setMicrophoneEnabled(true).catch(() => {});
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
+  }, [isConnected]);
+
+  const handleOrbClick = useCallback(async () => {
+    if (!isConnected) return; // can't publish/unpublish until connected
+    const next = !micEnabled;
+    setMicEnabled(next);
+    await localParticipant.setMicrophoneEnabled(next).catch(() => {});
+  }, [isConnected, micEnabled, localParticipant]);
+
+  // Receive structured video-control tool calls from the agent and dispatch
+  // them to the video adapter. Logged so each trigger is easy to verify.
+  useDataChannel(VIDEO_CONTROL_TOPIC, (msg) => {
+    const command = parseVideoCommand(msg.payload);
+    if (!command) return;
+    console.log("[VoiceAgent] video-control received", command);
+    onVideoControl?.(command);
+  });
 
   // Recompute on any text change (streaming partial STT updates) not just new segments.
   const transcriptKey = allTranscriptions.map((t) => t.text).join("\0");
@@ -69,16 +93,21 @@ function VoiceSection({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transcriptKey]);
 
-  const orbState = resolveOrbState(state, pttActive);
+  const orbState = resolveOrbState(state, isConnected && micEnabled);
   return <VoiceOrb state={orbState} onClick={handleOrbClick} />;
 }
 
 interface VoiceAgentProps {
   roomName?: string;
   onTurnsChange?: (turns: VoiceTurn[]) => void;
+  onVideoControl?: (command: VideoCommand) => void;
 }
 
-export function VoiceAgent({ roomName = "dental-tutor-room", onTurnsChange }: VoiceAgentProps) {
+export function VoiceAgent({
+  roomName = "dental-tutor-room",
+  onTurnsChange,
+  onVideoControl,
+}: VoiceAgentProps) {
   const [connectionInfo, setConnectionInfo] = useState<ConnectionInfo | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -118,7 +147,7 @@ export function VoiceAgent({ roomName = "dental-tutor-room", onTurnsChange }: Vo
       video={false}
     >
       <RoomAudioRenderer />
-      <VoiceSection onTurnsChange={onTurnsChange} />
+      <VoiceSection onTurnsChange={onTurnsChange} onVideoControl={onVideoControl} />
     </LiveKitRoom>
   );
 }

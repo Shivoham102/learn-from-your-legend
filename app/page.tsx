@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen } from "lucide-react";
 import AITutorPanel from "@/components/AITutorPanel";
 import DentalVideoPlayer, {
@@ -12,6 +12,11 @@ import ToothStageComparison from "@/components/ToothStageComparison";
 import VideoCommandChips from "@/components/VideoCommandChips";
 import { executeUIActions } from "@/lib/uiActions";
 import {
+  createVideoController,
+  type VideoCommand,
+  type VideoController,
+} from "@/lib/videoControl";
+import {
   DEMO_QUESTION,
   getProcedureStepBySlug,
   getTermBySlug,
@@ -22,6 +27,35 @@ import type { AIResponse, ChatMessage } from "@/types/dental";
 
 export default function DentalEducationPage() {
   const videoRef = useRef<DentalVideoPlayerHandle>(null);
+  // Adapter that drives the <video> element directly for voice tool calls.
+  // Created lazily inside a callback (not during render) so the React Compiler's
+  // ref rules are satisfied; the accessor reads the latest <video> on each call.
+  const controllerRef = useRef<VideoController | null>(null);
+  const getController = useCallback(() => {
+    if (!controllerRef.current) {
+      controllerRef.current = createVideoController(
+        () => videoRef.current?.getVideoElement() ?? null
+      );
+    }
+    return controllerRef.current;
+  }, []);
+
+  const handleVideoControl = useCallback(
+    (command: VideoCommand) => getController().handleCommand(command),
+    [getController]
+  );
+
+  // Dev-only: expose the adapter on window so the video-control tool calls can
+  // be verified from the browser console without the full voice stack, e.g.
+  //   __videoControl.pauseVideo()
+  //   __videoControl.seekVideo(42)
+  //   __videoControl.handleCommand({ action: "rewind", seconds: 10 })
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production") {
+      (window as unknown as { __videoControl?: unknown }).__videoControl =
+        getController();
+    }
+  }, [getController]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -259,6 +293,7 @@ export default function DentalEducationPage() {
               procedureCard={procedureCard}
               onCloseProcedureCard={() => setProcedureCard(null)}
               termCards={termCards}
+              onVideoControl={handleVideoControl}
             />
           </div>
         </div>
