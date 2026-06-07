@@ -50,9 +50,12 @@ function VoiceSection({
   // which procedure segment is on screen. Fire-and-forget; drops are fine.
   const currentTimeRef = useRef(currentTime ?? 0);
   useEffect(() => { currentTimeRef.current = currentTime ?? 0; }, [currentTime]);
+  const isConnectedRef = useRef(isConnected);
+  useEffect(() => { isConnectedRef.current = isConnected; }, [isConnected]);
   useEffect(() => {
     const enc = new TextEncoder();
     const id = setInterval(() => {
+      if (!isConnectedRef.current) return;
       localParticipant
         .publishData(
           enc.encode(JSON.stringify({ type: "video_timestamp", ts: currentTimeRef.current })),
@@ -68,11 +71,23 @@ function VoiceSection({
   const [micEnabled, setMicEnabled] = useState(false);
 
   const handleOrbClick = useCallback(async () => {
-    if (!isConnected) return; // can't publish/unpublish until connected
-    const next = !micEnabled;
-    setMicEnabled(next);
-    await localParticipant.setMicrophoneEnabled(next).catch(() => {});
-  }, [isConnected, micEnabled, localParticipant]);
+    if (!isConnected) return;
+    if (state === "speaking") {
+      // Interrupt agent immediately and open mic so user can speak
+      if (!micEnabled) {
+        setMicEnabled(true);
+        await localParticipant.setMicrophoneEnabled(true).catch(() => {});
+      }
+      const enc = new TextEncoder();
+      await localParticipant
+        .publishData(enc.encode(JSON.stringify({ type: "user_interrupt" })), { reliable: true })
+        .catch(() => {});
+    } else {
+      const next = !micEnabled;
+      setMicEnabled(next);
+      await localParticipant.setMicrophoneEnabled(next).catch(() => {});
+    }
+  }, [isConnected, micEnabled, state, localParticipant]);
 
   // Receive structured video-control tool calls from the agent and dispatch
   // them to the video adapter. Logged so each trigger is easy to verify.
