@@ -71,9 +71,10 @@ export default function VoiceOrb({ state = "listening" }: VoiceOrbProps) {
               <span
                 key={i}
                 className={`voice-orb-bar w-[5px] shrink-0 rounded-full sm:w-[6px] ${barClass}`}
+                suppressHydrationWarning
                 style={{
                   background: barGradient(i),
-                  height: `${baseHeight}px`,
+                  height: `${Math.round(baseHeight)}px`,
                   animationDelay: `${i * 0.045}s`,
                   opacity: isUser ? 0.94 : 0.82,
                 }}
