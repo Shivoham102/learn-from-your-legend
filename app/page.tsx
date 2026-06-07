@@ -1,14 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BookOpen } from "lucide-react";
 import AITutorPanel from "@/components/AITutorPanel";
 import DentalVideoPlayer, {
   type DentalVideoPlayerHandle,
 } from "@/components/DentalVideoPlayer";
-import KnowledgeCard from "@/components/KnowledgeCard";
 import ProcedureTimeline from "@/components/ProcedureTimeline";
-import ToothStageComparison from "@/components/ToothStageComparison";
 import VideoCommandChips from "@/components/VideoCommandChips";
 import { executeUIActions } from "@/lib/uiActions";
 import {
@@ -30,6 +27,7 @@ import type { AIResponse, ChatMessage } from "@/types/dental";
 
 export default function DentalEducationPage() {
   const videoRef = useRef<DentalVideoPlayerHandle>(null);
+  const sendToAgentRef = useRef<((payload: Record<string, unknown>) => void) | null>(null);
   // Adapter that drives the <video> element directly for voice tool calls.
   // Created lazily inside a callback (not during render) so the React Compiler's
   // ref rules are satisfied; the accessor reads the latest <video> on each call.
@@ -65,16 +63,11 @@ export default function DentalEducationPage() {
   const [duration, setDuration] = useState(PROCEDURE_DURATION);
   const [highlightedTerms, setHighlightedTerms] = useState<string[]>([]);
   const [activeStepId, setActiveStepId] = useState<string | undefined>();
-  const [comparisonStages, setComparisonStages] = useState<string[]>([]);
   const [procedureCard, setProcedureCard] = useState<{
     title: string;
     description: string;
     reasoning?: string;
     tags: string[];
-  } | null>(null);
-  const [floatingImage, setFloatingImage] = useState<{
-    url: string;
-    title?: string;
   } | null>(null);
   const termCards = useMemo(
     () =>
@@ -98,9 +91,7 @@ export default function DentalEducationPage() {
       const seg = findSegmentByTime(timestamp);
       if (seg) setActiveStepId(seg.id);
     },
-    onShowImage: (url: string, title?: string) => {
-      setFloatingImage({ url, title });
-    },
+    onShowImage: (_url: string, _title?: string) => {},
     onHighlightTerm: (term: string) => {
       setHighlightedTerms((prev) =>
         prev.includes(term) ? prev : [...prev, term]
@@ -118,9 +109,7 @@ export default function DentalEducationPage() {
         });
       }
     },
-    onShowToothComparison: (stages: string[]) => {
-      setComparisonStages(stages);
-    },
+    onShowToothComparison: (_stages: string[]) => {},
   };
 
   const processAIResponse = useCallback((response: AIResponse) => {
@@ -177,6 +166,19 @@ export default function DentalEducationPage() {
     [processAIResponse]
   );
 
+  const handleChipClick = useCallback((question: string) => {
+    // Add user bubble in chat immediately
+    setMessages((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), role: "user", content: question, timestamp: new Date() },
+    ]);
+    // Route to voice agent — no text API call, no ui_actions
+    if (sendToAgentRef.current) {
+      sendToAgentRef.current({ type: "user_interrupt" });
+      sendToAgentRef.current({ type: "text_question", question });
+    }
+  }, []);
+
   const handleRunDemo = () => {
     handleSendMessage(DEMO_QUESTION);
   };
@@ -185,19 +187,6 @@ export default function DentalEducationPage() {
     actionHandlers.onSeekVideo(timestamp);
   };
 
-  const handleCommandChip = (command: string) => {
-    if (command === "Rewind 10s") {
-      videoRef.current?.rewind(10);
-      return;
-    }
-    if (command === "Show stage 3 vs 4") {
-      actionHandlers.onShowToothComparison(["decay_stage_3", "decay_stage_4"]);
-      return;
-    }
-    handleSendMessage(command);
-  };
-
-  const hasQuickKnowledge = comparisonStages.length > 0 || floatingImage;
 
   return (
     <div className="relative min-h-screen bg-[#F7FAF9] text-[#1F2933]">
@@ -216,20 +205,12 @@ export default function DentalEducationPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight text-[#1F2933]">
-                Dent<span className="text-[#2DB6A3]">AI</span> Studio
+                Probe <span className="text-[#2DB6A3]">IQ</span>
               </h1>
               <p className="text-xs text-[#667085]">
                 Immersive dental procedure learning
               </p>
             </div>
-          </div>
-          <div className="hidden items-center gap-3 sm:flex">
-            <span className="rounded-full border border-[#E6ECEF] bg-white px-3 py-1 text-xs text-[#667085] card-shadow">
-              Case: MOD Composite Restoration
-            </span>
-            <span className="rounded-full border border-[#2DB6A3]/30 bg-[#DDF5EF] px-3 py-1 text-xs font-medium text-[#2DB6A3]">
-              Student View
-            </span>
           </div>
         </header>
 
@@ -245,48 +226,11 @@ export default function DentalEducationPage() {
               onDurationChange={setDuration}
             />
 
-            <VideoCommandChips onChipClick={handleCommandChip} />
+            <VideoCommandChips
+              segment={findSegmentByTime(currentTime) ?? null}
+              onChipClick={handleChipClick}
+            />
 
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-[#4A90E2]" strokeWidth={2} />
-                <h2 className="text-sm font-semibold text-[#1F2933]">
-                  Quick Knowledge
-                </h2>
-              </div>
-
-              {!hasQuickKnowledge && (
-                <div className="rounded-2xl border border-dashed border-[#E6ECEF] bg-white/60 px-6 py-8 text-center">
-                  <p className="text-sm text-[#667085]">
-                    Visual references appear here when the tutor highlights
-                    concepts from the procedure.
-                  </p>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                {comparisonStages.length > 0 && (
-                  <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 xl:col-span-2">
-                    <ToothStageComparison
-                      stageIds={comparisonStages}
-                      onClose={() => setComparisonStages([])}
-                    />
-                  </div>
-                )}
-
-                {floatingImage && (
-                  <div className="animate-in fade-in duration-500">
-                    <KnowledgeCard
-                      title={floatingImage.title ?? "Reference Image"}
-                      description="Visual reference from the dental knowledge base."
-                      imageUrl={floatingImage.url}
-                      category="Reference"
-                      onClose={() => setFloatingImage(null)}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
 
           <div className="lg:sticky lg:top-6 lg:h-[calc(100vh-7rem)]">
@@ -300,6 +244,7 @@ export default function DentalEducationPage() {
               onCloseProcedureCard={() => setProcedureCard(null)}
               termCards={termCards}
               onVideoControl={handleVideoControl}
+              onSendReady={(sender) => { sendToAgentRef.current = sender; }}
               currentTime={currentTime}
             />
           </div>

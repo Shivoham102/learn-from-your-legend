@@ -197,6 +197,7 @@ class DentalAgent(Agent):
             self._moss = None
         self._moss_loaded = False
         self._last_announced_segment_id: str | None = None
+        self._chip_task: asyncio.Task | None = None
         self._announce_timer: asyncio.TimerHandle | None = None
         self._announce_handle: Any = None
         self._loop: asyncio.AbstractEventLoop | None = None
@@ -295,6 +296,91 @@ class DentalAgent(Agent):
             await self.session.interrupt()
         except Exception:
             pass
+
+    def inject_text_question(self, question: str) -> None:
+        """Called when user clicks a suggestion chip — treat as a voice turn substitute."""
+        self._pre_question_time_s = self._current_time_s
+        self._in_question = True
+        if self._announce_timer is not None:
+            self._announce_timer.cancel()
+            self._announce_timer = None
+        if self._loop is not None:
+            # Cancel previous chip task so only the latest click generates a reply.
+            if self._chip_task is not None and not self._chip_task.done():
+                self._chip_task.cancel()
+            self._chip_task = self._loop.create_task(self._handle_injected_question(question))
+
+    async def _query_moss(self, query: str) -> str:
+        """Semantic search over procedure video index. Returns formatted hits or ""."""
+        if self._moss is None:
+            return ""
+        try:
+            if not self._moss_loaded:
+                await self._moss.load_index(MOSS_INDEX_NAME)
+                self._moss_loaded = True
+            result = await self._moss.query(MOSS_INDEX_NAME, query, QueryOptions(top_k=5))
+            if not result.docs:
+                return ""
+            return "\n".join(f"- {doc.text}" for doc in result.docs)
+        except Exception as exc:
+            logger.error("Moss query error: %s", exc)
+            return ""
+
+    async def _handle_injected_question(self, question: str) -> None:
+        try:
+            logger.info("[chip] injected question=%r at %.1fs", question, self._pre_question_time_s)
+            try:
+                await self.session.interrupt()
+            except Exception:
+                pass
+            await self._send_video_command({"action": "pause"})
+
+            # Pre-query Moss so the answer comes from video content, not LLM knowledge.
+            moss_ctx = await self._query_moss(question)
+            logger.info("[chip] moss returned %d chars for question=%r", len(moss_ctx), question)
+
+            # interrupt() may have left a FunctionCall with broken JSON arguments in the
+            # chat context. MiniMax rejects these with 400. Strip them before replying.
+            chat_ctx = None
+            try:
+                ctx = self.session.history.copy()
+                bad_call_ids: set[str] = set()
+                clean_items = []
+                for item in ctx.items:
+                    item_type = getattr(item, "type", None)
+                    if item_type == "function_call":
+                        try:
+                            json.loads(item.arguments)
+                            clean_items.append(item)
+                        except (json.JSONDecodeError, ValueError):
+                            bad_call_ids.add(item.call_id)
+                            logger.info("[chip] removed malformed FunctionCall call_id=%s name=%s", item.call_id, item.name)
+                    elif item_type == "function_call_output" and item.call_id in bad_call_ids:
+                        logger.info("[chip] removed orphaned FunctionCallOutput call_id=%s", item.call_id)
+                    else:
+                        clean_items.append(item)
+                ctx.items = clean_items
+                chat_ctx = ctx
+            except Exception as exc:
+                logger.warning("[chip] ctx cleanup failed: %s", exc)
+
+            instructions = None
+            if moss_ctx:
+                instructions = (
+                    f"Context from the procedure video:\n{moss_ctx}\n"
+                    "Answer the user's question in 1-2 plain sentences using only this context. "
+                    "Do not call search_video — context is already provided above."
+                )
+
+            kwargs: dict[str, Any] = {"user_input": question, "allow_interruptions": True}
+            if chat_ctx is not None:
+                kwargs["chat_ctx"] = chat_ctx
+            if instructions:
+                kwargs["instructions"] = instructions
+            self.session.generate_reply(**kwargs)
+        except asyncio.CancelledError:
+            logger.info("[chip] task cancelled for question=%r (newer chip click arrived)", question)
+            raise
 
     async def on_exit(self) -> None:
         if self._announce_timer is not None:
@@ -433,21 +519,10 @@ class DentalAgent(Agent):
         procedure steps, clinical rationale, common student questions) for context
         relevant to a question. Call before answering questions about techniques,
         instruments, materials, anatomy, or why a step is done."""
-        if self._moss is None:
-            return "Knowledge base not configured."
-        try:
-            if not self._moss_loaded:
-                await self._moss.load_index(MOSS_INDEX_NAME)
-                self._moss_loaded = True
-            result = await self._moss.query(
-                MOSS_INDEX_NAME, query, QueryOptions(top_k=5)
-            )
-            if not result.docs:
-                return "No relevant information found."
-            return "\n".join(f"- {doc.text}" for doc in result.docs)
-        except Exception as exc:
-            logger.error("Moss query error: %s", exc)
-            return f"Could not retrieve knowledge: {exc}"
+        result = await self._query_moss(query)
+        if not result:
+            return "Knowledge base not configured." if self._moss is None else "No relevant information found."
+        return result
 
 
 async def entrypoint(ctx: JobContext) -> None:
@@ -466,6 +541,10 @@ async def entrypoint(ctx: JobContext) -> None:
                 agent.update_timestamp(float(payload["ts"]))
             elif payload.get("type") == "user_interrupt":
                 agent.handle_interrupt()
+            elif payload.get("type") == "text_question":
+                question = str(payload.get("question", "")).strip()
+                if question:
+                    agent.inject_text_question(question)
         except Exception:
             pass
 
