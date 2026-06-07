@@ -20,9 +20,12 @@ import {
   DEMO_QUESTION,
   getProcedureStepBySlug,
   getTermBySlug,
-  PROCEDURE_STEPS,
-  TIMELINE_MARKERS,
 } from "@/lib/sampleData";
+import {
+  findSegmentByTime,
+  PROCEDURE_DURATION,
+  PROCEDURE_TIMELINE_MARKERS,
+} from "@/lib/procedureData";
 import type { AIResponse, ChatMessage } from "@/types/dental";
 
 export default function DentalEducationPage() {
@@ -59,7 +62,7 @@ export default function DentalEducationPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration] = useState(420);
+  const [duration, setDuration] = useState(PROCEDURE_DURATION);
   const [highlightedTerms, setHighlightedTerms] = useState<string[]>([]);
   const [activeStepId, setActiveStepId] = useState<string | undefined>();
   const [comparisonStages, setComparisonStages] = useState<string[]>([]);
@@ -92,10 +95,8 @@ export default function DentalEducationPage() {
     onSeekVideo: (timestamp: number) => {
       videoRef.current?.seekTo(timestamp);
       setCurrentTime(timestamp);
-      const step = PROCEDURE_STEPS.find(
-        (s) => timestamp >= s.timestamp_start && timestamp <= s.timestamp_end
-      );
-      if (step) setActiveStepId(step.id);
+      const seg = findSegmentByTime(timestamp);
+      if (seg) setActiveStepId(seg.id);
     },
     onShowImage: (url: string, title?: string) => {
       setFloatingImage({ url, title });
@@ -236,7 +237,12 @@ export default function DentalEducationPage() {
           <div className="space-y-4">
             <DentalVideoPlayer
               ref={videoRef}
-              onTimeUpdate={setCurrentTime}
+              onTimeUpdate={(t) => {
+                setCurrentTime(t);
+                const seg = findSegmentByTime(t);
+                if (seg) setActiveStepId(seg.id);
+              }}
+              onDurationChange={setDuration}
             />
 
             <VideoCommandChips onChipClick={handleCommandChip} />
@@ -283,7 +289,7 @@ export default function DentalEducationPage() {
             </div>
           </div>
 
-          <div className="lg:min-h-[calc(100vh-8rem)]">
+          <div className="lg:sticky lg:top-6 lg:h-[calc(100vh-7rem)]">
             <AITutorPanel
               messages={messages}
               onSendMessage={handleSendMessage}
@@ -294,13 +300,14 @@ export default function DentalEducationPage() {
               onCloseProcedureCard={() => setProcedureCard(null)}
               termCards={termCards}
               onVideoControl={handleVideoControl}
+              currentTime={currentTime}
             />
           </div>
         </div>
       </div>
 
       <ProcedureTimeline
-        markers={TIMELINE_MARKERS}
+        markers={PROCEDURE_TIMELINE_MARKERS}
         currentTime={currentTime}
         duration={duration}
         activeStepId={activeStepId}

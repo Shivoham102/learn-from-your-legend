@@ -48,8 +48,8 @@ async function generateToken(roomName: string, participantName: string) {
     roomSvc
       .listParticipants(roomName)
       .then((participants) => {
-        // kind === 2 is AGENT in LiveKit proto
-        const hasAgent = participants.some((p) => (p as { kind?: number }).kind === 2);
+        // ParticipantInfo_Kind.AGENT === 4 in LiveKit proto (2 is EGRESS)
+        const hasAgent = participants.some((p) => (p as { kind?: number }).kind === 4);
         console.log(`[dispatch] room=${roomName} participants=${participants.length} hasAgent=${hasAgent}`);
         if (hasAgent) return;
         return dispatchClient

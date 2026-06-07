@@ -33,6 +33,7 @@ interface AITutorPanelProps {
   onCloseProcedureCard?: () => void;
   termCards?: TermCardData[];
   onVideoControl?: (command: VideoCommand) => void;
+  currentTime?: number;
 }
 
 export default function AITutorPanel({
@@ -44,6 +45,7 @@ export default function AITutorPanel({
   onCloseProcedureCard,
   termCards = [],
   onVideoControl,
+  currentTime,
 }: AITutorPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [voiceTurns, setVoiceTurns] = useState<VoiceTurn[]>([]);
@@ -215,7 +217,7 @@ export default function AITutorPanel({
       </div>
 
       <div className="shrink-0 border-t border-[#E6ECEF] bg-[#F7FAF9] px-4 py-2">
-        <VoiceAgent onTurnsChange={setVoiceTurns} onVideoControl={onVideoControl} />
+        <VoiceAgent onTurnsChange={setVoiceTurns} onVideoControl={onVideoControl} currentTime={currentTime} />
       </div>
 
     </div>

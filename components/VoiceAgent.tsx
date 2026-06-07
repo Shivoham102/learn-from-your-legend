@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   LiveKitRoom,
   RoomAudioRenderer,
@@ -35,27 +35,37 @@ export type VoiceTurn = { text: string; isAgent: boolean };
 function VoiceSection({
   onTurnsChange,
   onVideoControl,
+  currentTime,
 }: {
   onTurnsChange?: (turns: VoiceTurn[]) => void;
   onVideoControl?: (command: VideoCommand) => void;
+  currentTime?: number;
 }) {
   const { state } = useVoiceAssistant();
   const { localParticipant } = useLocalParticipant();
   const connectionState = useConnectionState();
   const isConnected = connectionState === ConnectionState.Connected;
   const allTranscriptions = useTranscriptions();
-  // Always-listening: the mic turns on as soon as the room is connected. The orb
-  // toggles mute, but speaking does not require holding the button (no PTT).
-  const [micEnabled, setMicEnabled] = useState(true);
-
-  // Enable the mic only once the engine is actually connected — publishing the
-  // track before then throws "engine not connected within timeout".
+  // Publish current video timestamp to the room every 1s so the agent knows
+  // which procedure segment is on screen. Fire-and-forget; drops are fine.
+  const currentTimeRef = useRef(currentTime ?? 0);
+  useEffect(() => { currentTimeRef.current = currentTime ?? 0; }, [currentTime]);
   useEffect(() => {
-    if (isConnected && micEnabled) {
-      localParticipant.setMicrophoneEnabled(true).catch(() => {});
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnected]);
+    const enc = new TextEncoder();
+    const id = setInterval(() => {
+      localParticipant
+        .publishData(
+          enc.encode(JSON.stringify({ type: "video_timestamp", ts: currentTimeRef.current })),
+          { reliable: false },
+        )
+        .catch(() => {});
+    }, 1000);
+    return () => clearInterval(id);
+  }, [localParticipant]);
+
+  // Mic starts muted — the user taps the orb to start speaking. The orb toggles
+  // the mic on/off; nothing is published until the engine is connected.
+  const [micEnabled, setMicEnabled] = useState(false);
 
   const handleOrbClick = useCallback(async () => {
     if (!isConnected) return; // can't publish/unpublish until connected
@@ -101,12 +111,14 @@ interface VoiceAgentProps {
   roomName?: string;
   onTurnsChange?: (turns: VoiceTurn[]) => void;
   onVideoControl?: (command: VideoCommand) => void;
+  currentTime?: number;
 }
 
 export function VoiceAgent({
   roomName = "dental-tutor-room",
   onTurnsChange,
   onVideoControl,
+  currentTime,
 }: VoiceAgentProps) {
   const [connectionInfo, setConnectionInfo] = useState<ConnectionInfo | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -147,7 +159,7 @@ export function VoiceAgent({
       video={false}
     >
       <RoomAudioRenderer />
-      <VoiceSection onTurnsChange={onTurnsChange} onVideoControl={onVideoControl} />
+      <VoiceSection onTurnsChange={onTurnsChange} onVideoControl={onVideoControl} currentTime={currentTime} />
     </LiveKitRoom>
   );
 }
