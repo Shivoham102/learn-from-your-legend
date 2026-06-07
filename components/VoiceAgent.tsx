@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   LiveKitRoom,
   RoomAudioRenderer,
@@ -16,53 +16,69 @@ type ConnectionInfo = {
   serverUrl: string;
 };
 
-function agentStateToOrbState(state: string): VoiceOrbState {
-  if (state === "speaking") return "ai-speaking";
+function resolveOrbState(agentState: string, pttActive: boolean): VoiceOrbState {
+  if (pttActive) return "user-speaking";
+  if (agentState === "speaking") return "ai-speaking";
   return "listening";
 }
 
-function VoiceSection() {
-  const { state, agent } = useVoiceAssistant();
+export type VoiceTurn = { text: string; isAgent: boolean };
+
+function VoiceSection({
+  onTurnsChange,
+}: {
+  onTurnsChange?: (turns: VoiceTurn[]) => void;
+}) {
+  const { state } = useVoiceAssistant();
   const { localParticipant } = useLocalParticipant();
   const allTranscriptions = useTranscriptions();
+  const [pttActive, setPttActive] = useState(false);
 
-  const agentMessages = allTranscriptions.filter(
-    (t) => agent && t.participantInfo.identity === agent.identity,
-  );
-  const userMessages = allTranscriptions.filter(
-    (t) => t.participantInfo.identity === localParticipant.identity,
-  );
+  const handleOrbClick = useCallback(async () => {
+    const next = !pttActive;
+    setPttActive(next);
+    await localParticipant.setMicrophoneEnabled(next);
+  }, [pttActive, localParticipant]);
 
-  const lastAgent = agentMessages.at(-1)?.text ?? null;
-  const lastUser = userMessages.at(-1)?.text ?? null;
-  const orbState = agentStateToOrbState(state);
+  // Reset PTT when agent starts speaking (agent has the floor)
+  useEffect(() => {
+    if (state === "speaking" && pttActive) {
+      setPttActive(false);
+      localParticipant.setMicrophoneEnabled(false).catch(() => {});
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
-  return (
-    <>
-      <VoiceOrb state={orbState} />
-      {(lastUser || lastAgent) && (
-        <div className="flex flex-col gap-1 px-2 pt-1 pb-2 text-xs">
-          {lastUser && (
-            <p className="self-end rounded-xl bg-blue-50 px-3 py-1.5 text-blue-800">
-              {lastUser}
-            </p>
-          )}
-          {lastAgent && (
-            <p className="self-start rounded-xl bg-[#F7FAF9] px-3 py-1.5 text-[#1F2933]">
-              {lastAgent}
-            </p>
-          )}
-        </div>
-      )}
-    </>
-  );
+  // Recompute on any text change (streaming partial STT updates) not just new segments.
+  const transcriptKey = allTranscriptions.map((t) => t.text).join("\0");
+
+  useEffect(() => {
+    if (!onTurnsChange) return;
+    const userIdentity = localParticipant.identity;
+    // Dedupe by text: two agents or streaming duplicates produce same text;
+    // reverse-iterate so last (most complete) segment wins.
+    const seen = new Set<string>();
+    const deduped: VoiceTurn[] = [];
+    for (const t of [...allTranscriptions].reverse()) {
+      if (!seen.has(t.text)) {
+        seen.add(t.text);
+        deduped.unshift({ text: t.text, isAgent: t.participantInfo.identity !== userIdentity });
+      }
+    }
+    onTurnsChange(deduped);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transcriptKey]);
+
+  const orbState = resolveOrbState(state, pttActive);
+  return <VoiceOrb state={orbState} onClick={handleOrbClick} />;
 }
 
 interface VoiceAgentProps {
   roomName?: string;
+  onTurnsChange?: (turns: VoiceTurn[]) => void;
 }
 
-export function VoiceAgent({ roomName = "dental-tutor-room" }: VoiceAgentProps) {
+export function VoiceAgent({ roomName = "dental-tutor-room", onTurnsChange }: VoiceAgentProps) {
   const [connectionInfo, setConnectionInfo] = useState<ConnectionInfo | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -98,11 +114,11 @@ export function VoiceAgent({ roomName = "dental-tutor-room" }: VoiceAgentProps) 
     <LiveKitRoom
       token={connectionInfo.token}
       serverUrl={connectionInfo.serverUrl}
-      audio={true}
+      audio={false}
       video={false}
     >
       <RoomAudioRenderer />
-      <VoiceSection />
+      <VoiceSection onTurnsChange={onTurnsChange} />
     </LiveKitRoom>
   );
 }

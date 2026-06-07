@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import os
 
@@ -60,10 +59,8 @@ class DentalAgent(Agent):
 
     async def on_enter(self) -> None:
         await self.session.say(
-            "Hello! I'm your dental procedure learning assistant. "
-            "While the video is processing, I'd love to learn a bit about you. "
-            "Are you a dental student, a resident, a practicing clinician, or a patient? "
-            "And what do you hope to learn from this procedure video?",
+            "Hi! I'm your dental procedure assistant. "
+            "Are you a student, resident, or clinician?",
             allow_interruptions=True,
         )
 
@@ -141,16 +138,6 @@ async def entrypoint(ctx: JobContext) -> None:
     )
 
     await session.start(agent, room=ctx.room)
-
-    async def announce_when_ready() -> None:
-        await asyncio.sleep(10)  # wait for greeting to finish
-        await session.say(
-            "The procedure video is loaded and ready. "
-            "Feel free to ask me about any specific moment or technique.",
-            allow_interruptions=True,
-        )
-
-    asyncio.ensure_future(announce_when_ready())
 
 
 if __name__ == "__main__":

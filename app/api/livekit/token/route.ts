@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AccessToken, AgentDispatchClient } from "livekit-server-sdk";
+import { AccessToken, AgentDispatchClient, RoomServiceClient } from "livekit-server-sdk";
 import { getLiveKitConfig, isLiveKitConfigured } from "@/lib/livekit";
 
 export { isLiveKitConfigured };
+
+// Fast-path dedup: StrictMode fires useEffect twice in ~1ms — both requests arrive
+// before the agent joins, so the participant check below can't catch them.
+// This map blocks the second request synchronously.
+const lastDispatchedAt = new Map<string, number>();
+const DISPATCH_DEDUP_MS = 3_000;
 
 async function generateToken(roomName: string, participantName: string) {
   const { apiKey, apiSecret, url } = getLiveKitConfig();
@@ -27,16 +33,39 @@ async function generateToken(roomName: string, participantName: string) {
   at.addGrant({ room: roomName, roomJoin: true, canPublish: true, canSubscribe: true });
   const jwt = await at.toJwt();
 
-  // Dispatch the agent — fire-and-forget so token returns immediately
+  // Dispatch agent — fire-and-forget, double-dispatch guarded by two layers:
+  // 1. Timestamp dedup (synchronous): blocks StrictMode near-simultaneous requests
+  // 2. Participant check (async): skips dispatch if agent already alive in room
   const httpUrl = url.replace(/^wss?:\/\//, "https://");
-  const dispatchClient = new AgentDispatchClient(httpUrl, apiKey, apiSecret);
-  dispatchClient
-    .listDispatch(roomName)
-    .catch(() => [] as Awaited<ReturnType<typeof dispatchClient.listDispatch>>)
-    .then((existing) => {
-      if (existing.some((d) => d.agentName === "dental-coach")) return;
-      return dispatchClient.createDispatch(roomName, "dental-coach").catch(() => {});
-    });
+  const now = Date.now();
+  const last = lastDispatchedAt.get(roomName) ?? 0;
+  if (now - last <= DISPATCH_DEDUP_MS) {
+    console.log(`[dispatch] dedup skip (${now - last}ms ago)`);
+  } else {
+    lastDispatchedAt.set(roomName, now);
+    const dispatchClient = new AgentDispatchClient(httpUrl, apiKey, apiSecret);
+    const roomSvc = new RoomServiceClient(httpUrl, apiKey, apiSecret);
+    roomSvc
+      .listParticipants(roomName)
+      .then((participants) => {
+        // kind === 2 is AGENT in LiveKit proto
+        const hasAgent = participants.some((p) => (p as { kind?: number }).kind === 2);
+        console.log(`[dispatch] room=${roomName} participants=${participants.length} hasAgent=${hasAgent}`);
+        if (hasAgent) return;
+        return dispatchClient
+          .createDispatch(roomName, "dental-coach")
+          .then((d) => console.log("[dispatch] created:", d.agentName));
+      })
+      .catch(() => {
+        // Room doesn't exist yet — dispatch unconditionally
+        console.log("[dispatch] new room, dispatching");
+        dispatchClient.createDispatch(roomName, "dental-coach")
+          .then((d) => console.log("[dispatch] created:", d.agentName))
+          .catch((err: unknown) =>
+            console.error("[dispatch] failed:", err instanceof Error ? err.message : err),
+          );
+      });
+  }
 
   return { token: jwt, serverUrl: url, url, mock: false, roomName, participantName };
 }
