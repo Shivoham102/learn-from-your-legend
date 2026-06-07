@@ -30,15 +30,17 @@ function resolveOrbState(agentState: string, micEnabled: boolean): VoiceOrbState
   return "listening";
 }
 
-export type VoiceTurn = { text: string; isAgent: boolean };
+export type VoiceTurn = { text: string; isAgent: boolean; createdAt: number };
 
 function VoiceSection({
   onTurnsChange,
   onVideoControl,
+  onSendReady,
   currentTime,
 }: {
   onTurnsChange?: (turns: VoiceTurn[]) => void;
   onVideoControl?: (command: VideoCommand) => void;
+  onSendReady?: (sender: (payload: Record<string, unknown>) => void) => void;
   currentTime?: number;
 }) {
   const { state } = useVoiceAssistant();
@@ -68,6 +70,18 @@ function VoiceSection({
 
   // Mic starts muted — the user taps the orb to start speaking. The orb toggles
   // the mic on/off; nothing is published until the engine is connected.
+  // Expose a stable sender so page.tsx can inject chip questions over the data channel.
+  useEffect(() => {
+    if (!isConnected || !onSendReady) return;
+    const enc = new TextEncoder();
+    onSendReady((payload) => {
+      localParticipant
+        .publishData(enc.encode(JSON.stringify(payload)), { reliable: true })
+        .catch(() => {});
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected]);
+
   const [micEnabled, setMicEnabled] = useState(false);
 
   const handleOrbClick = useCallback(async () => {
@@ -98,6 +112,9 @@ function VoiceSection({
     onVideoControl?.(command);
   });
 
+  // Track when each unique transcript text was first seen so createdAt is stable.
+  const firstSeenRef = useRef<Map<string, number>>(new Map());
+
   // Recompute on any text change (streaming partial STT updates) not just new segments.
   const transcriptKey = allTranscriptions.map((t) => t.text).join("\0");
 
@@ -111,7 +128,14 @@ function VoiceSection({
     for (const t of [...allTranscriptions].reverse()) {
       if (!seen.has(t.text)) {
         seen.add(t.text);
-        deduped.unshift({ text: t.text, isAgent: t.participantInfo.identity !== userIdentity });
+        if (!firstSeenRef.current.has(t.text)) {
+          firstSeenRef.current.set(t.text, Date.now());
+        }
+        deduped.unshift({
+          text: t.text,
+          isAgent: t.participantInfo.identity !== userIdentity,
+          createdAt: firstSeenRef.current.get(t.text)!,
+        });
       }
     }
     onTurnsChange(deduped);
@@ -126,6 +150,7 @@ interface VoiceAgentProps {
   roomName?: string;
   onTurnsChange?: (turns: VoiceTurn[]) => void;
   onVideoControl?: (command: VideoCommand) => void;
+  onSendReady?: (sender: (payload: Record<string, unknown>) => void) => void;
   currentTime?: number;
 }
 
@@ -133,6 +158,7 @@ export function VoiceAgent({
   roomName = "dental-tutor-room",
   onTurnsChange,
   onVideoControl,
+  onSendReady,
   currentTime,
 }: VoiceAgentProps) {
   const [connectionInfo, setConnectionInfo] = useState<ConnectionInfo | null>(null);
@@ -174,7 +200,7 @@ export function VoiceAgent({
       video={false}
     >
       <RoomAudioRenderer />
-      <VoiceSection onTurnsChange={onTurnsChange} onVideoControl={onVideoControl} currentTime={currentTime} />
+      <VoiceSection onTurnsChange={onTurnsChange} onVideoControl={onVideoControl} onSendReady={onSendReady} currentTime={currentTime} />
     </LiveKitRoom>
   );
 }

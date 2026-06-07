@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Lightbulb, Sparkles } from "lucide-react";
 import type { ChatMessage, UIAction } from "@/types/dental";
 import { getActionLabel } from "@/lib/uiActions";
@@ -33,6 +33,7 @@ interface AITutorPanelProps {
   onCloseProcedureCard?: () => void;
   termCards?: TermCardData[];
   onVideoControl?: (command: VideoCommand) => void;
+  onSendReady?: (sender: (payload: Record<string, unknown>) => void) => void;
   currentTime?: number;
 }
 
@@ -45,14 +46,27 @@ export default function AITutorPanel({
   onCloseProcedureCard,
   termCards = [],
   onVideoControl,
+  onSendReady,
   currentTime,
 }: AITutorPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [voiceTurns, setVoiceTurns] = useState<VoiceTurn[]>([]);
 
+  type UnifiedItem =
+    | { kind: "text"; msg: ChatMessage }
+    | { kind: "voice"; turn: VoiceTurn };
+
+  const unifiedChat = useMemo<UnifiedItem[]>(() => {
+    const all: Array<{ createdAt: number; item: UnifiedItem }> = [
+      ...messages.map((m) => ({ createdAt: m.timestamp.getTime(), item: { kind: "text" as const, msg: m } })),
+      ...voiceTurns.map((t) => ({ createdAt: t.createdAt, item: { kind: "voice" as const, turn: t } })),
+    ];
+    return all.sort((a, b) => a.createdAt - b.createdAt).map((x) => x.item);
+  }, [messages, voiceTurns]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, voiceTurns, isLoading, procedureCard, termCards]);
+  }, [unifiedChat, isLoading, procedureCard, termCards]);
 
   const hasContextCards =
     procedureCard || termCards.length > 0 || highlightedTerms.length > 0;
@@ -138,7 +152,7 @@ export default function AITutorPanel({
       )}
 
       <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-        {messages.length === 0 && voiceTurns.length === 0 && (
+        {unifiedChat.length === 0 && (
           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
             <p className="text-sm text-[#667085]">
               Ask about the procedure while you watch
@@ -149,53 +163,57 @@ export default function AITutorPanel({
           </div>
         )}
 
-        {/* Voice transcripts — rendered in main chat area */}
-        {voiceTurns.map((turn, i) => (
-          <div
-            key={`voice-${i}`}
-            className={`flex ${turn.isAgent ? "justify-start" : "justify-end"}`}
-          >
-            <p
-              className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                turn.isAgent
-                  ? "border border-[#E6ECEF] bg-[#F7FAF9] text-[#1F2933]"
-                  : "bg-[#4A90E2] text-white"
-              }`}
-            >
-              {turn.text}
-            </p>
-          </div>
-        ))}
-
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`max-w-[90%] rounded-2xl px-4 py-3 ${
-                msg.role === "user"
-                  ? "bg-[#4A90E2] text-white"
-                  : "border border-[#E6ECEF] bg-[#F7FAF9] text-[#1F2933]"
-              }`}
-            >
-              <p className="text-sm leading-relaxed">{msg.content}</p>
-              {msg.ui_actions && msg.ui_actions.length > 0 && (
-                <div
-                  className={`mt-3 flex flex-wrap gap-1.5 border-t pt-3 ${
-                    msg.role === "user"
-                      ? "border-white/20"
-                      : "border-[#E6ECEF]"
+        {unifiedChat.map((item, i) => {
+          if (item.kind === "voice") {
+            const { turn } = item;
+            return (
+              <div
+                key={`voice-${turn.createdAt}-${i}`}
+                className={`flex ${turn.isAgent ? "justify-start" : "justify-end"}`}
+              >
+                <p
+                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                    turn.isAgent
+                      ? "border border-[#E6ECEF] bg-[#F7FAF9] text-[#1F2933]"
+                      : "bg-[#4A90E2] text-white"
                   }`}
                 >
-                  {msg.ui_actions.map((action, i) => (
-                    <ActionBadge key={i} action={action} isUser={msg.role === "user"} />
-                  ))}
-                </div>
-              )}
+                  {turn.text}
+                </p>
+              </div>
+            );
+          }
+          const { msg } = item;
+          return (
+            <div
+              key={msg.id}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            >
+              <div
+                className={`max-w-[90%] rounded-2xl px-4 py-3 ${
+                  msg.role === "user"
+                    ? "bg-[#4A90E2] text-white"
+                    : "border border-[#E6ECEF] bg-[#F7FAF9] text-[#1F2933]"
+                }`}
+              >
+                <p className="text-sm leading-relaxed">{msg.content}</p>
+                {msg.ui_actions && msg.ui_actions.length > 0 && (
+                  <div
+                    className={`mt-3 flex flex-wrap gap-1.5 border-t pt-3 ${
+                      msg.role === "user"
+                        ? "border-white/20"
+                        : "border-[#E6ECEF]"
+                    }`}
+                  >
+                    {msg.ui_actions.map((action, idx) => (
+                      <ActionBadge key={idx} action={action} isUser={msg.role === "user"} />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {isLoading && (
           <div className="flex justify-start">
@@ -217,7 +235,7 @@ export default function AITutorPanel({
       </div>
 
       <div className="shrink-0 border-t border-[#E6ECEF] bg-[#F7FAF9] px-4 py-2">
-        <VoiceAgent onTurnsChange={setVoiceTurns} onVideoControl={onVideoControl} currentTime={currentTime} />
+        <VoiceAgent onTurnsChange={setVoiceTurns} onVideoControl={onVideoControl} onSendReady={onSendReady} currentTime={currentTime} />
       </div>
 
     </div>
