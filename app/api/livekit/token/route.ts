@@ -27,12 +27,13 @@ async function generateToken(roomName: string, participantName: string) {
   at.addGrant({ room: roomName, roomJoin: true, canPublish: true, canSubscribe: true });
   const jwt = await at.toJwt();
 
-  // Dispatch the agent — convert wss:// → https:// for REST client
+  // Dispatch the agent — fire-and-forget, idempotent check prevents duplicates
   const httpUrl = url.replace(/^wss?:\/\//, "https://");
-  const dispatch = new AgentDispatchClient(httpUrl, apiKey, apiSecret);
-  await dispatch.createDispatch(roomName, "dental-coach").catch(() => {
-    // Ignore if already dispatched (room already has agent)
-  });
+  const dispatchClient = new AgentDispatchClient(httpUrl, apiKey, apiSecret);
+  dispatchClient.listDispatch(roomName).then((existing) => {
+    if (existing.some((d) => d.agentName === "dental-coach")) return;
+    return dispatchClient.createDispatch(roomName, "dental-coach");
+  }).catch(() => {});
 
   return { token: jwt, serverUrl: url, url, mock: false, roomName, participantName };
 }

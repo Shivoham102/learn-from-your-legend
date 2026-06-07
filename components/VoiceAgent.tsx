@@ -67,15 +67,21 @@ export function VoiceAgent({ roomName = "dental-tutor-room" }: VoiceAgentProps) 
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/livekit/token?videoId=${encodeURIComponent(roomName)}&identity=student`)
+    const ac = new AbortController();
+    fetch(
+      `/api/livekit/token?videoId=${encodeURIComponent(roomName)}&identity=student`,
+      { signal: ac.signal },
+    )
       .then((r) => {
         if (!r.ok) throw new Error(`Token fetch failed: ${r.status}`);
         return r.json() as Promise<ConnectionInfo>;
       })
       .then(setConnectionInfo)
-      .catch((e: unknown) =>
-        setFetchError(e instanceof Error ? e.message : String(e)),
-      );
+      .catch((e: unknown) => {
+        if (e instanceof Error && e.name === "AbortError") return;
+        setFetchError(e instanceof Error ? e.message : String(e));
+      });
+    return () => ac.abort();
   }, [roomName]);
 
   if (fetchError) {
