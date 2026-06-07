@@ -1,0 +1,197 @@
+[
+  {
+    "id": "doubt_decay_removed_seg_02",
+    "text": "Student question: How do I know when all the decay is removed? Short answer: the operator removes soft, infected dentin and preserves firm healthy tooth structure. In a demo answer, explain that decay removal is judged by texture, visual cues, and clinical judgment; the dentist should stop drilling when infected dentin is cleared and further cutting would risk unnecessary approach toward the pulp chamber.",
+    "metadata": {
+      "canonical_key": "decay_removed",
+      "display_name": "How do I know decay is removed?",
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_02",
+      "start": "00:08",
+      "end": "00:29",
+      "phase": "caries removal",
+      "linked_concepts": "caries,dentin,infected dentin,pulp chamber,why did they stop drilling",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "doubt_water_spray_seg_02",
+    "text": "Student question: Why use water spray while drilling? Short answer: water coolant reduces heat from the high-speed bur, rinses debris, and improves visibility. It helps protect tooth structure during caries removal and access preparation.",
+    "metadata": {
+      "canonical_key": "water_spray",
+      "display_name": "Why use water spray?",
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_02",
+      "start": "00:08",
+      "end": "00:29",
+      "phase": "caries removal",
+      "linked_concepts": "water coolant,high-speed handpiece,round carbide bur,caries removal",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "doubt_where_drilling_seg_03",
+    "text": "Student question: Where are they drilling? Short answer: the dentist is preparing an access cavity through the molar crown toward the pulp chamber and root canal orifices. The goal is to create straight-line access into the canal system, not simply make the cavity larger.",
+    "metadata": {
+      "canonical_key": "where_drilling",
+      "display_name": "Where are they drilling?",
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_03",
+      "start": "00:29",
+      "end": "00:52",
+      "phase": "cavity prep",
+      "linked_concepts": "access cavity,pulp chamber,root canal orifices,straight-line access",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "doubt_pulp_chamber_seg_03",
+    "text": "Student question: What is the pulp chamber? Short answer: the pulp chamber is the central space inside the tooth crown that connects to the root canals. In this procedure, access preparation exposes the pulp chamber floor so the dentist can locate canal orifices and continue root canal treatment.",
+    "metadata": {
+      "canonical_key": "pulp_chamber",
+      "display_name": "What is the pulp chamber?",
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_03",
+      "start": "00:29",
+      "end": "00:52",
+      "phase": "cavity prep",
+      "linked_concepts": "pulp chamber,root canals,root canal orifices,access cavity",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "doubt_rubber_dam_seg_04",
+    "text": "Student question: Why use rubber dam? Short answer: rubber dam isolation keeps saliva away, improves moisture control, reduces contamination of the canal space, and protects the airway. It is especially important during endodontic treatment because root canals need a clean controlled field.",
+    "metadata": {
+      "canonical_key": "rubber_dam",
+      "display_name": "Why use rubber dam?",
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_04",
+      "start": "00:52",
+      "end": "01:00",
+      "phase": "isolation",
+      "linked_concepts": "rubber dam sheet,isolation,saliva control,root canal",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "doubt_sodium_hypochlorite_seg_05",
+    "text": "Student question: What does sodium hypochlorite do? Short answer: sodium hypochlorite is the root canal irrigant used to disinfect canals, dissolve organic tissue remnants, and flush debris during shaping. Files shape the canal, while the irrigant cleans and disinfects the canal space.",
+    "metadata": {
+      "canonical_key": "sodium_hypochlorite",
+      "display_name": "What does sodium hypochlorite do?",
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_05",
+      "start": "01:00",
+      "end": "01:29",
+      "phase": "endodontics",
+      "linked_concepts": "sodium hypochlorite,irrigation,root canals,rotary files",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "doubt_canal_drying_seg_05",
+    "text": "Student question: Why are paper points placed into the canals? Short answer: paper points dry the canals after irrigation and before obturation. Dry canals help the sealer and gutta-percha adapt better during the canal filling step.",
+    "metadata": {
+      "canonical_key": "paper_points",
+      "display_name": "Why are paper points used?",
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_05",
+      "start": "01:00",
+      "end": "01:29",
+      "phase": "endodontics",
+      "linked_concepts": "paper points,canal drying,gutta-percha,endodontic sealer",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "doubt_gutta_percha_seg_06",
+    "text": "Student question: What is gutta-percha? Short answer: gutta-percha is the main filling material used to obturate cleaned and dried root canals. It is placed with endodontic sealer and compacted so the canal space is filled and sealed.",
+    "metadata": {
+      "canonical_key": "gutta_percha",
+      "display_name": "What is gutta-percha?",
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_06",
+      "start": "01:29",
+      "end": "01:48",
+      "phase": "endodontics",
+      "linked_concepts": "gutta-percha,obturation,endodontic sealer,root canals",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "doubt_etch_seg_07",
+    "text": "Student question: Why etch? Short answer: etching prepares enamel and dentin so bonding adhesive can attach more effectively. In this procedure, phosphoric acid gel is used before adhesive and composite placement. For the ceramic onlay later, a different etch and silane are used on the ceramic surface.",
+    "metadata": {
+      "canonical_key": "why_etch",
+      "display_name": "Why etch?",
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_07",
+      "start": "01:48",
+      "end": "02:11",
+      "phase": "cavity prep",
+      "linked_concepts": "etching,phosphoric acid gel,bonding adhesive,enamel,dentin",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "doubt_cure_layers_seg_08",
+    "text": "Student question: Why cure in layers? Short answer: composite resin is placed in increments so each layer can be adapted well and hardened adequately with the curing light. Layering helps reduce voids and avoids leaving deep composite undercured.",
+    "metadata": {
+      "canonical_key": "cure_layers",
+      "display_name": "Why cure in layers?",
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_08",
+      "start": "02:11",
+      "end": "02:38",
+      "phase": "filling",
+      "linked_concepts": "composite resin,dental curing light,core build-up,incremental placement",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "doubt_why_onlay_seg_09",
+    "text": "Student question: Why prepare an onlay? Short answer: after root canal treatment, caries removal, and core build-up, the molar may have weakened cusps and missing tooth structure. A ceramic onlay covers and protects the prepared crown while restoring shape and function.",
+    "metadata": {
+      "canonical_key": "why_onlay",
+      "display_name": "Why prepare an onlay?",
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_09",
+      "start": "02:38",
+      "end": "03:10",
+      "phase": "cavity prep",
+      "linked_concepts": "onlay,ceramic onlay,cusps,onlay preparation,molar crown",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "doubt_silane_seg_11",
+    "text": "Student question: Why use silane? Short answer: silane coupling agent improves the bond between etched ceramic and resin cement. In this procedure, the ceramic onlay is etched with hydrofluoric acid, rinsed, then treated with silane before cementation.",
+    "metadata": {
+      "canonical_key": "why_silane",
+      "display_name": "Why use silane?",
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_11",
+      "start": "03:19",
+      "end": "03:32",
+      "phase": "cementation",
+      "linked_concepts": "silane,ceramic onlay,hydrofluoric acid etch,luting cement",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "doubt_excess_cement_seg_12",
+    "text": "Student question: Why clean away excess cement? Short answer: excess luting cement around the onlay margins can feel bulky, irritate tissues, or interfere with finishing. Cleaning it before final curing and polishing helps create a smoother restoration boundary.",
+    "metadata": {
+      "canonical_key": "excess_cement_cleanup",
+      "display_name": "Why clean excess cement?",
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_12",
+      "start": "03:32",
+      "end": "03:45",
+      "phase": "cementation",
+      "linked_concepts": "luting cement,ceramic onlay,dental explorer,margins",
+      "source_status": "ai_generated_demo"
+    }
+  }
+]

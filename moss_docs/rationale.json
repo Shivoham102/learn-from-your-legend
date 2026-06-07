@@ -1,0 +1,197 @@
+[
+  {
+    "id": "rationale_anesthesia_before_access",
+    "text": "Local anesthesia is given before drilling so the patient remains comfortable while enamel, dentin, pulp chamber access, canal shaping, and restoration steps are performed. In this demo, the injection occurs at the start because the later steps can involve sensitive tooth and pulpal tissues.",
+    "metadata": {
+      "canonical_key": "anesthesia_before_access",
+      "display_name": "Why anesthesia is first",
+      "segment_id": "seg_01",
+      "start": "00:00",
+      "end": "00:08",
+      "linked_concepts": "local anesthetic,dental syringe,gingiva,molar",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "rationale_conservative_caries_removal",
+    "text": "The dentist removes infected, softened dentin while preserving healthy tooth structure. This explains why did they stop drilling: once the decayed dentin has been cleared, deeper cutting can weaken the tooth or move unnecessarily toward the pulp chamber. The goal is complete decay removal without overcutting.",
+    "metadata": {
+      "canonical_key": "conservative_caries_removal",
+      "display_name": "Why drilling stops after decay removal",
+      "segment_id": "seg_02",
+      "start": "00:08",
+      "end": "00:29",
+      "linked_concepts": "caries,dentin,enamel,pulp chamber,round carbide bur",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "rationale_water_spray",
+    "text": "Water spray is used with the high-speed handpiece to cool the tooth, reduce heat from the bur, rinse away debris, and improve visibility. When students ask why use water spray during drilling, the simple answer is that it protects the tooth and helps the operator see while cutting.",
+    "metadata": {
+      "canonical_key": "water_spray",
+      "display_name": "Why water spray is used",
+      "segment_id": "seg_02",
+      "start": "00:08",
+      "end": "00:29",
+      "linked_concepts": "water coolant,high-speed handpiece,round carbide bur,caries removal",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "rationale_straight_line_access",
+    "text": "Straight-line access is created so endodontic instruments can reach the root canals more predictably. Refining the access cavity helps the dentist locate canal orifices, reduce file bending, and avoid missing canal anatomy. This is why the access opening is shaped after the pulp chamber is exposed.",
+    "metadata": {
+      "canonical_key": "straight_line_access",
+      "display_name": "Why access is refined",
+      "segment_id": "seg_03",
+      "start": "00:29",
+      "end": "00:52",
+      "linked_concepts": "access cavity,pulp chamber,root canal orifices,endodontic probe",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "rationale_rubber_dam_isolation",
+    "text": "Rubber dam isolation keeps saliva away from the tooth, lowers contamination risk, improves moisture control, and protects the airway from instruments or irrigants. If a student asks why rubber dam, the answer is that root canal treatment needs a clean, controlled, isolated field.",
+    "metadata": {
+      "canonical_key": "rubber_dam_isolation",
+      "display_name": "Why rubber dam isolation matters",
+      "segment_id": "seg_04",
+      "start": "00:52",
+      "end": "01:00",
+      "linked_concepts": "rubber dam sheet,isolation,root canal,saliva control",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "rationale_irrigation_with_sodium_hypochlorite",
+    "text": "Rotary files shape the canals, but irrigation helps clean areas that files do not fully touch. Sodium hypochlorite disinfects the canal space, helps dissolve organic tissue remnants, and flushes debris. This is why irrigation is repeated between file sizes during canal shaping.",
+    "metadata": {
+      "canonical_key": "irrigation_with_sodium_hypochlorite",
+      "display_name": "Why sodium hypochlorite is used",
+      "segment_id": "seg_05",
+      "start": "01:00",
+      "end": "01:29",
+      "linked_concepts": "sodium hypochlorite,irrigation,rotary files,root canals",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "rationale_canal_drying_before_obturation",
+    "text": "Canals are dried with paper points before obturation because excess moisture can interfere with the sealer and filling material. Drying comes after irrigation and before gutta-percha placement, helping the canal filling create a better seal.",
+    "metadata": {
+      "canonical_key": "canal_drying_before_obturation",
+      "display_name": "Why canals are dried",
+      "segment_id": "seg_05",
+      "start": "01:00",
+      "end": "01:29",
+      "linked_concepts": "paper points,root canals,gutta-percha,endodontic sealer",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "rationale_obturation_seal",
+    "text": "Obturation fills the cleaned canal space with gutta-percha and sealer to create a three-dimensional seal. The rationale is to seal the canal system after cleaning so empty canal spaces are not left behind. Compaction helps adapt the material against the canal walls.",
+    "metadata": {
+      "canonical_key": "obturation_seal",
+      "display_name": "Why root canals are obturated",
+      "segment_id": "seg_06",
+      "start": "01:29",
+      "end": "01:48",
+      "linked_concepts": "obturation,gutta-percha,endodontic sealer,plugger",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "rationale_etching_and_bonding",
+    "text": "Etching and bonding prepare tooth structure so composite resin can attach more effectively. Phosphoric acid gel conditions enamel and dentin, then bonding adhesive is applied and cured. If students ask why etch, the answer is that etching creates a better surface for adhesive bonding.",
+    "metadata": {
+      "canonical_key": "etching_and_bonding",
+      "display_name": "Why etching and bonding are done",
+      "segment_id": "seg_07",
+      "start": "01:48",
+      "end": "02:11",
+      "linked_concepts": "phosphoric acid gel,bonding adhesive,enamel,dentin,curing light",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "rationale_composite_layering",
+    "text": "Composite resin is placed in increments because each layer can be adapted against the walls and light-cured more reliably. Layering reduces voids and helps ensure deeper material is not left undercured. This is the practical answer to why cure in layers during composite core build-up.",
+    "metadata": {
+      "canonical_key": "composite_layering",
+      "display_name": "Why composite is placed in layers",
+      "segment_id": "seg_08",
+      "start": "02:11",
+      "end": "02:38",
+      "linked_concepts": "composite resin,composite placement instrument,dental curing light,core build-up",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "rationale_onlay_preparation",
+    "text": "Onlay preparation reduces weakened cusps and shapes the tooth so the ceramic onlay has a clear path of insertion and defined margins. If students ask why onlay, the reason is that a large root-canal-treated molar may need cuspal coverage to protect and restore the crown.",
+    "metadata": {
+      "canonical_key": "onlay_preparation",
+      "display_name": "Why the tooth is prepared for an onlay",
+      "segment_id": "seg_09",
+      "start": "02:38",
+      "end": "03:10",
+      "linked_concepts": "onlay preparation,ceramic onlay,cusps,tapered diamond bur,margins",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "rationale_impression_accuracy",
+    "text": "The impression records the prepared tooth and margins so a ceramic onlay can be made to fit accurately. Silicone impression material captures fine detail around the preparation. A poor impression could lead to a restoration that does not seat or seal well.",
+    "metadata": {
+      "canonical_key": "impression_accuracy",
+      "display_name": "Why an impression is taken",
+      "segment_id": "seg_10",
+      "start": "03:10",
+      "end": "03:19",
+      "linked_concepts": "silicone impression material,impression tray,onlay preparation,margins",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "rationale_silane_ceramic_bonding",
+    "text": "The ceramic onlay is etched and treated with silane so resin cement can bond more strongly to the ceramic surface. Hydrofluoric acid prepares the ceramic internally, and silane acts as a coupling agent. If students ask why use silane, it helps connect ceramic to resin-based cement.",
+    "metadata": {
+      "canonical_key": "silane_ceramic_bonding",
+      "display_name": "Why silane is used",
+      "segment_id": "seg_11",
+      "start": "03:19",
+      "end": "03:32",
+      "linked_concepts": "ceramic onlay,hydrofluoric acid etch gel,silane,luting cement",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "rationale_cement_cleanup",
+    "text": "After the onlay is seated with luting cement, excess cement is cleaned away so margins are not bulky or irritating. Cement cleanup also helps the final restoration boundary be easier to finish and polish. This is why the explorer appears around the seated onlay.",
+    "metadata": {
+      "canonical_key": "cement_cleanup",
+      "display_name": "Why excess cement is removed",
+      "segment_id": "seg_12",
+      "start": "03:32",
+      "end": "03:45",
+      "linked_concepts": "luting cement,ceramic onlay,dental explorer,margins",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "rationale_finishing_polishing",
+    "text": "Final curing, finishing, and polishing refine the restoration margins and surface. The goal is to smooth the boundary, remove roughness, and make the restoration more comfortable and maintainable. This is why polishing happens after the ceramic onlay has been seated.",
+    "metadata": {
+      "canonical_key": "finishing_polishing",
+      "display_name": "Why finishing and polishing are last",
+      "segment_id": "seg_13",
+      "start": "03:45",
+      "end": "03:54",
+      "linked_concepts": "dental curing light,polishing cup,polishing paste,restoration margins",
+      "source_status": "ai_generated_demo"
+    }
+  }
+]

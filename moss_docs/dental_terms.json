@@ -1,0 +1,134 @@
+[
+  {
+    "id": "term_caries",
+    "text": "Caries means tooth decay caused by bacterial acid damage to enamel and dentin. In this root canal and onlay procedure, caries is the diseased tooth structure being removed before the dentist accesses the pulp chamber and rebuilds the tooth. Students may ask about caries as decay, cavity, softened dentin, infected dentin, or why the dentist is drilling.",
+    "metadata": {
+      "canonical_key": "caries",
+      "display_name": "Caries",
+      "category": "condition",
+      "related_terms": "decay,cavity,dentin,enamel,caries removal",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "term_access_cavity",
+    "text": "An access cavity is the opening prepared through the tooth crown so the operator can reach the pulp chamber and root canal orifices. In the video, access cavity preparation follows caries removal and is refined to create a clear path into the canal system. Students often ask where are they drilling; the answer is that the dentist is entering through the crown toward the pulp chamber while preserving as much sound tooth structure as possible.",
+    "metadata": {
+      "canonical_key": "access_cavity",
+      "display_name": "Access cavity",
+      "category": "procedure",
+      "related_terms": "pulp chamber,root canal orifices,straight-line access,dentin",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "term_straight_line_access",
+    "text": "Straight-line access means shaping the access opening so instruments can enter the root canals with minimal bending or obstruction. It matters because poor access can make canal shaping harder, increase file stress, and make canal orifices easier to miss. In this procedure, the access walls are refined after the pulp chamber is exposed.",
+    "metadata": {
+      "canonical_key": "straight_line_access",
+      "display_name": "Straight-line access",
+      "category": "procedure",
+      "related_terms": "access cavity,pulp chamber,root canal orifices,rotary files",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "term_irrigation",
+    "text": "Irrigation is the flushing of the root canal space with a disinfecting solution during endodontic treatment. In this video, sodium hypochlorite is used between rotary file sizes to help dissolve tissue remnants, reduce microbial contamination, and wash debris out of the canal system. Students may ask what the syringe is doing or what sodium hypochlorite does.",
+    "metadata": {
+      "canonical_key": "irrigation",
+      "display_name": "Irrigation",
+      "category": "procedure",
+      "related_terms": "sodium hypochlorite,root canals,rotary files,irrigation syringe",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "term_obturation",
+    "text": "Obturation is the filling and sealing of cleaned root canals after shaping, irrigation, and drying. In this segment, gutta-percha cones with endodontic sealer are compacted to create a three-dimensional seal inside the canal space. Students often ask what is gutta-percha or why the canals are being filled after cleaning.",
+    "metadata": {
+      "canonical_key": "obturation",
+      "display_name": "Obturation",
+      "category": "procedure",
+      "related_terms": "gutta-percha,endodontic sealer,root canals,canal drying",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "term_etching",
+    "text": "Etching is the use of an acid gel to prepare enamel, dentin, or ceramic surfaces for bonding. In the tooth preparation, phosphoric acid gel roughens and cleans the enamel and dentin surface before adhesive placement. In the ceramic onlay, hydrofluoric acid etch prepares the internal ceramic surface before silane is applied.",
+    "metadata": {
+      "canonical_key": "etching",
+      "display_name": "Etching",
+      "category": "procedure",
+      "related_terms": "phosphoric acid gel,hydrofluoric acid etch,bonding adhesive,silane",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "term_bonding",
+    "text": "Bonding is the adhesive process that helps restorative material attach to tooth structure or ceramic. In this procedure, bonding adhesive is applied after etching enamel and dentin, then later adhesive and luting cement help seat the ceramic onlay. Students may ask why etch first; etching improves the surface so bonding can be stronger and more reliable.",
+    "metadata": {
+      "canonical_key": "bonding",
+      "display_name": "Bonding",
+      "category": "procedure",
+      "related_terms": "etching,bonding adhesive,luting cement,ceramic onlay",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "term_light_curing",
+    "text": "Light curing uses a dental curing light to harden light-activated adhesive, composite resin, or cement. In the video, the curing light appears during bonding, composite core build-up, and final onlay cementation. Students may ask why cure in layers; curing each layer helps the material harden adequately and reduces the risk of uncured material deep in the restoration.",
+    "metadata": {
+      "canonical_key": "light_curing",
+      "display_name": "Light curing",
+      "category": "procedure",
+      "related_terms": "dental curing light,composite resin,bonding adhesive,luting cement",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "term_composite_core_build_up",
+    "text": "Composite core build-up means rebuilding missing tooth structure with composite resin before the final restoration. In this case, composite resin is placed incrementally and cured to create a stable foundation for the ceramic onlay. The core helps replace lost tooth structure after caries removal and root canal access.",
+    "metadata": {
+      "canonical_key": "composite_core_build_up",
+      "display_name": "Composite core build-up",
+      "category": "procedure",
+      "related_terms": "composite resin,dental curing light,onlay preparation,cavity",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "term_onlay",
+    "text": "An onlay is an indirect restoration that covers and protects part of the tooth crown, often including weakened cusps. In the video, the tooth is prepared for a ceramic onlay after root canal treatment and composite core build-up. Students may ask why onlay; the onlay helps restore strength, shape, and function when the remaining tooth structure needs cuspal coverage.",
+    "metadata": {
+      "canonical_key": "onlay",
+      "display_name": "Onlay",
+      "category": "restoration",
+      "related_terms": "ceramic onlay,onlay preparation,luting cement,cusps",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "term_impression",
+    "text": "An impression records the shape of the prepared tooth and surrounding structures so a restoration can be made accurately. In this procedure, silicone impression material is syringed around the preparation and captured in an impression tray. Students may ask why an impression is needed; it gives the lab or digital workflow the detail needed to make a well-fitting onlay.",
+    "metadata": {
+      "canonical_key": "impression",
+      "display_name": "Impression",
+      "category": "procedure",
+      "related_terms": "silicone impression material,impression tray,onlay preparation",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "term_finishing_polishing",
+    "text": "Finishing and polishing refine the restoration margins and surface after cementation. In the final segment, the margins are light-cured, then polished with cups and points so the restoration boundary is smoother and less irritating. Students may ask why polish; polishing improves comfort, cleans margins, and makes the restoration easier to maintain.",
+    "metadata": {
+      "canonical_key": "finishing_polishing",
+      "display_name": "Finishing and polishing",
+      "category": "procedure",
+      "related_terms": "polishing cup,polishing paste,ceramic onlay,margins",
+      "source_status": "ai_generated_demo"
+    }
+  }
+]

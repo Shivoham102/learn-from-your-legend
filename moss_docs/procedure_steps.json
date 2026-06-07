@@ -1,0 +1,223 @@
+[
+  {
+    "id": "root_canal_onlay_seg_01",
+    "text": "Segment 01, 00:00 to 00:08, shows local anesthesia injection. The operator administers local anesthetic into the mucobuccal fold near the target mandibular molar to numb the area before drilling and root canal treatment. Students should notice the dental syringe and understand that anesthesia comes before caries removal, access preparation, canal shaping, and restoration so the patient remains comfortable.",
+    "metadata": {
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_01",
+      "start": "00:00",
+      "end": "00:08",
+      "key_moment": "00:01",
+      "phase": "anesthesia",
+      "step_name": "Local anesthesia injection",
+      "instruments": "dental syringe",
+      "anatomy": "gingiva,mandibular molars",
+      "materials": "local anesthetic",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "root_canal_onlay_seg_02",
+    "text": "Segment 02, 00:08 to 00:29, shows decay removal and access cavity preparation. A high-speed handpiece with a round carbide bur and water coolant removes superficial and deep caries from enamel and dentin. Students should notice water spray, rotary cutting, and the goal of eliminating infected dentin while preserving healthy tooth structure. If they ask why did they stop drilling, the answer is that drilling should stop when infected soft dentin has been removed and deeper cutting would unnecessarily approach the pulp chamber.",
+    "metadata": {
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_02",
+      "start": "00:08",
+      "end": "00:29",
+      "key_moment": "00:24",
+      "phase": "caries removal",
+      "step_name": "Decay removal and access cavity preparation",
+      "instruments": "high-speed handpiece,round carbide bur",
+      "anatomy": "molar tooth,enamel,dentin",
+      "materials": "water coolant",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "root_canal_onlay_seg_03",
+    "text": "Segment 03, 00:29 to 00:52, shows access opening and pulp chamber exposure. The operator assesses the cavity floor with an endodontic probe, locates root canal orifices, and refines the access cavity walls with a high-speed handpiece and tapered diamond bur. Students should understand that the dentist is drilling toward the pulp chamber to create straight-line access into the root canal system, not randomly enlarging the cavity.",
+    "metadata": {
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_03",
+      "start": "00:29",
+      "end": "00:52",
+      "key_moment": "00:44",
+      "phase": "cavity prep",
+      "step_name": "Access opening and pulp chamber exposure",
+      "instruments": "endodontic probe,high-speed handpiece,tapered diamond bur",
+      "anatomy": "pulp chamber,root canal orifices",
+      "materials": "",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "root_canal_onlay_seg_04",
+    "text": "Segment 04, 00:52 to 01:00, shows rubber dam isolation. A rubber dam sheet isolates the treated molar from saliva and protects the airway before canal cleaning begins. Students should connect this moment with contamination control, moisture control, and patient safety. If they ask why rubber dam, it is because root canal treatment needs a clean isolated field.",
+    "metadata": {
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_04",
+      "start": "00:52",
+      "end": "01:00",
+      "key_moment": "00:54",
+      "phase": "isolation",
+      "step_name": "Rubber dam isolation",
+      "instruments": "",
+      "anatomy": "molar tooth",
+      "materials": "rubber dam sheet",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "root_canal_onlay_seg_05",
+    "text": "Segment 05, 01:00 to 01:29, shows canal shaping, irrigation, and drying. Endodontic rotary files shape the root canals, sodium hypochlorite irrigation disinfects and flushes debris between file sizes, and sterile paper points dry the canals. Students should notice that shaping and irrigation work together: files create canal form while irrigant cleans areas files may not fully touch.",
+    "metadata": {
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_05",
+      "start": "01:00",
+      "end": "01:29",
+      "key_moment": "01:25",
+      "phase": "endodontics",
+      "step_name": "Canal shaping and irrigation",
+      "instruments": "endodontic rotary handpiece,rotary files,irrigation syringe,paper points",
+      "anatomy": "root canals,pulp chamber",
+      "materials": "sodium hypochlorite,paper points",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "root_canal_onlay_seg_06",
+    "text": "Segment 06, 01:29 to 01:48, shows canal obturation. Clean, dry canals are filled with gutta-percha master cones coated in endodontic sealer, then compacted with a plugger to seal the canal space. Students should understand that obturation follows cleaning and drying; it is the filling step that helps seal the treated root canal system.",
+    "metadata": {
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_06",
+      "start": "01:29",
+      "end": "01:48",
+      "key_moment": "01:31",
+      "phase": "endodontics",
+      "step_name": "Canal obturation",
+      "instruments": "endodontic plugger,tweezers",
+      "anatomy": "root canals",
+      "materials": "gutta-percha cones,endodontic sealer",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "root_canal_onlay_seg_07",
+    "text": "Segment 07, 01:48 to 02:11, shows matrix band application, etching, and bonding. A Tofflemire matrix band helps establish proper tooth contours, phosphoric acid gel etches enamel and dentin, and bonding adhesive is applied and light-cured. Students should notice the sequence: isolate shape with matrix, prepare the tooth surface by etching, then apply adhesive so composite can bond.",
+    "metadata": {
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_07",
+      "start": "01:48",
+      "end": "02:11",
+      "key_moment": "02:09",
+      "phase": "cavity prep",
+      "step_name": "Matrix band application, etching, and bonding",
+      "instruments": "Tofflemire matrix retainer,microbrush,dental curing light",
+      "anatomy": "molar tooth",
+      "materials": "phosphoric acid gel,bonding adhesive",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "root_canal_onlay_seg_08",
+    "text": "Segment 08, 02:11 to 02:38, shows composite core build-up. Composite resin is placed incrementally into the cavity, adapted against the walls, and light-cured layer by layer. Students should understand that the core build-up replaces missing tooth structure and creates a stable foundation for the later ceramic onlay. If they ask why cure in layers, each increment needs adequate light penetration and adaptation.",
+    "metadata": {
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_08",
+      "start": "02:11",
+      "end": "02:38",
+      "key_moment": "02:24",
+      "phase": "filling",
+      "step_name": "Composite core build-up",
+      "instruments": "composite placement instrument,dental curing light,microbrush",
+      "anatomy": "molar tooth cavity",
+      "materials": "composite resin",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "root_canal_onlay_seg_09",
+    "text": "Segment 09, 02:38 to 03:10, shows onlay preparation. After removing the matrix band, the operator uses a high-speed handpiece and tapered diamond bur to reduce weakened cusps and create a smooth, divergent preparation with well-defined margins. Students may ask why onlay; after a root canal and large restoration, an onlay can protect weakened tooth structure and restore the crown form.",
+    "metadata": {
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_09",
+      "start": "02:38",
+      "end": "03:10",
+      "key_moment": "03:00",
+      "phase": "cavity prep",
+      "step_name": "Onlay preparation",
+      "instruments": "Tofflemire retainer,high-speed handpiece,tapered diamond bur",
+      "anatomy": "molar tooth crown",
+      "materials": "",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "root_canal_onlay_seg_10",
+    "text": "Segment 10, 03:10 to 03:19, shows an elastomeric impression. Silicone impression material is dispensed around the onlay preparation and captured in an impression tray to record an accurate master impression. Students should connect this to fabrication accuracy: the ceramic onlay must fit the margins and preparation shape.",
+    "metadata": {
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_10",
+      "start": "03:10",
+      "end": "03:19",
+      "key_moment": "03:15",
+      "phase": "impression",
+      "step_name": "Elastomeric impression",
+      "instruments": "impression tray,syringe",
+      "anatomy": "molar tooth",
+      "materials": "silicone impression material",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "root_canal_onlay_seg_11",
+    "text": "Segment 11, 03:19 to 03:32, shows ceramic onlay pre-treatment. The internal surface of the ceramic onlay is etched with hydrofluoric acid, rinsed, and treated with silane coupling agent. Students should understand that this prepares the ceramic surface for stronger bonding to resin cement during seating.",
+    "metadata": {
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_11",
+      "start": "03:19",
+      "end": "03:32",
+      "key_moment": "03:24",
+      "phase": "cementation",
+      "step_name": "Ceramic onlay pre-treatment",
+      "instruments": "microbrush,air-water syringe",
+      "anatomy": "",
+      "materials": "ceramic onlay,hydrofluoric acid etch gel,silane coupling agent",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "root_canal_onlay_seg_12",
+    "text": "Segment 12, 03:32 to 03:45, shows adhesive application and onlay seating. Adhesive is applied to the tooth preparation, the ceramic onlay is loaded with luting cement, seated firmly, and excess cement is cleaned away with an explorer. Students should notice that cement cleanup matters because excess cement at the margin can interfere with comfort and finish.",
+    "metadata": {
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_12",
+      "start": "03:32",
+      "end": "03:45",
+      "key_moment": "03:35",
+      "phase": "cementation",
+      "step_name": "Adhesive application and onlay seating",
+      "instruments": "microbrush,dental explorer",
+      "anatomy": "molar tooth",
+      "materials": "bonding adhesive,luting cement",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "root_canal_onlay_seg_13",
+    "text": "Segment 13, 03:45 to 03:54, shows curing, finishing, and polishing. The margins are light-cured thoroughly, then the restoration boundaries are finished and polished with a low-speed handpiece, polishing cup, and polishing paste. Students should understand this final step as margin refinement: smoothing and polishing help the onlay feel better and reduce rough edges.",
+    "metadata": {
+      "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+      "segment_id": "seg_13",
+      "start": "03:45",
+      "end": "03:54",
+      "key_moment": "03:49",
+      "phase": "finishing",
+      "step_name": "Curing, finishing, and polishing",
+      "instruments": "dental curing light,low-speed handpiece,polishing cup",
+      "anatomy": "molar tooth",
+      "materials": "polishing paste",
+      "source_status": "ai_generated_demo"
+    }
+  }
+]

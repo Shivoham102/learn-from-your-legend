@@ -1,0 +1,122 @@
+[
+  {
+    "id": "image_access_cavity",
+    "text": "Reference image for access cavity. Shows the opening prepared through the molar crown toward the pulp chamber and root canal orifices. Useful when students ask where are they drilling, what is an access cavity, or why the preparation is shaped that way.",
+    "metadata": {
+      "image_concept": "access_cavity",
+      "asset_id": "img_access_cavity_001",
+      "image_url": "/assets/reference/access_cavity.png",
+      "caption": "Access cavity showing entry through the crown toward the pulp chamber.",
+      "display_when": "access cavity,pulp chamber,canal entry,where are they drilling",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "image_pulp_chamber_orifices",
+    "text": "Reference image for pulp chamber and canal orifices. Shows the chamber floor and small openings that lead into root canals. Useful when students ask what is the pulp chamber, how the dentist finds canals, or why an explorer is used after access opening.",
+    "metadata": {
+      "image_concept": "pulp_chamber_orifices",
+      "asset_id": "img_pulp_chamber_orifices_001",
+      "image_url": "/assets/reference/pulp_chamber_orifices.png",
+      "caption": "Pulp chamber floor with canal orifices.",
+      "display_when": "pulp chamber,root canal orifices,endodontic explorer,canal entry",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "image_rubber_dam_isolation",
+    "text": "Reference image for rubber dam isolation. Shows a molar isolated from saliva during endodontic treatment. Useful when students ask why rubber dam or why the tooth is covered before canal shaping and irrigation.",
+    "metadata": {
+      "image_concept": "rubber_dam_isolation",
+      "asset_id": "img_rubber_dam_isolation_001",
+      "image_url": "/assets/reference/rubber_dam_isolation.png",
+      "caption": "Rubber dam isolation around a treated molar.",
+      "display_when": "rubber dam,isolation,saliva control,root canal safety",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "image_rotary_file_irrigation",
+    "text": "Reference image for rotary file shaping and irrigation. Shows a file entering the canal and an irrigation syringe delivering solution. Useful when students ask what sodium hypochlorite does, why canals are irrigated, or what the file is doing.",
+    "metadata": {
+      "image_concept": "rotary_file_irrigation",
+      "asset_id": "img_rotary_file_irrigation_001",
+      "image_url": "/assets/reference/rotary_file_irrigation.png",
+      "caption": "Rotary file shaping with irrigation in the root canal.",
+      "display_when": "rotary files,sodium hypochlorite,irrigation,canal shaping",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "image_gutta_percha_obturation",
+    "text": "Reference image for gutta-percha obturation. Shows gutta-percha cones filling shaped root canals with sealer. Useful when students ask what is gutta-percha, why the canals are being filled, or what obturation means.",
+    "metadata": {
+      "image_concept": "gutta_percha_obturation",
+      "asset_id": "img_gutta_percha_obturation_001",
+      "image_url": "/assets/reference/gutta_percha_obturation.png",
+      "caption": "Root canals filled with gutta-percha and sealer.",
+      "display_when": "gutta-percha,obturation,endodontic sealer,root canal filling",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "image_matrix_band",
+    "text": "Reference image for a Tofflemire matrix band around a molar. Shows how the band helps form walls and contours before composite core build-up. Useful when students ask why a band is around the tooth.",
+    "metadata": {
+      "image_concept": "matrix_band",
+      "asset_id": "img_matrix_band_001",
+      "image_url": "/assets/reference/matrix_band.png",
+      "caption": "Matrix band around a molar to support restorative contour.",
+      "display_when": "Tofflemire matrix,matrix band,tooth contour,composite build-up",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "image_composite_layering",
+    "text": "Reference image for composite layering. Shows composite resin placed in increments inside a prepared molar cavity and cured layer by layer. Useful when students ask why cure in layers or why composite is added in small amounts.",
+    "metadata": {
+      "image_concept": "composite_layering",
+      "asset_id": "img_composite_layering_001",
+      "image_url": "/assets/reference/composite_layering.png",
+      "caption": "Incremental composite core build-up before onlay preparation.",
+      "display_when": "composite resin,core build-up,why cure in layers,dental curing light",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "image_onlay_preparation",
+    "text": "Reference image for onlay preparation. Shows reduced cusps, divergent internal walls, and defined margins on a molar prepared for a ceramic onlay. Useful when students ask why onlay or why the tooth is shaped after the root canal.",
+    "metadata": {
+      "image_concept": "onlay_preparation",
+      "asset_id": "img_onlay_preparation_001",
+      "image_url": "/assets/reference/onlay_preparation.png",
+      "caption": "Molar prepared with cuspal coverage and defined margins for an onlay.",
+      "display_when": "onlay preparation,why onlay,cusps,margins,ceramic onlay",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "image_ceramic_onlay_bonding",
+    "text": "Reference image for ceramic onlay bonding. Shows the internal ceramic surface treated before seating and the onlay placed with luting cement. Useful when students ask why use silane, why use luting cement, or how the ceramic onlay attaches.",
+    "metadata": {
+      "image_concept": "ceramic_onlay_bonding",
+      "asset_id": "img_ceramic_onlay_bonding_001",
+      "image_url": "/assets/reference/ceramic_onlay_bonding.png",
+      "caption": "Ceramic onlay pre-treatment and cementation workflow.",
+      "display_when": "ceramic onlay,silane,luting cement,hydrofluoric acid etch",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "image_polishing_margins",
+    "text": "Reference image for finishing and polishing margins. Shows a polishing cup smoothing the restoration boundary after cementation. Useful when students ask why polish or what happens at the end of the onlay procedure.",
+    "metadata": {
+      "image_concept": "polishing_margins",
+      "asset_id": "img_polishing_margins_001",
+      "image_url": "/assets/reference/polishing_margins.png",
+      "caption": "Polishing restoration margins after final curing.",
+      "display_when": "polishing,finishing,margins,polishing cup,final restoration",
+      "source_status": "ai_generated_demo"
+    }
+  }
+]
