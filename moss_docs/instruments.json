@@ -1,0 +1,200 @@
+[
+  {
+    "id": "instrument_dental_syringe",
+    "text": "A dental syringe delivers local anesthetic near the treatment area. In segment 01, it is used to administer anesthesia into the mucobuccal fold near the target molar so the patient is comfortable before drilling and root canal treatment.",
+    "metadata": {
+      "canonical_key": "dental_syringe",
+      "display_name": "Dental syringe",
+      "visual_cues": "needle,cartridge,local anesthetic injection",
+      "segments": "seg_01",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_high_speed_handpiece",
+    "text": "A high-speed handpiece is a rotary dental instrument used with burs to cut enamel, dentin, restorative material, or carious tooth structure. In this video, it is used with a round carbide bur for decay removal and with a tapered diamond bur for access refinement and onlay preparation. Students often recognize it by fast rotary motion and water spray.",
+    "metadata": {
+      "canonical_key": "high_speed_handpiece",
+      "display_name": "High-speed handpiece",
+      "visual_cues": "fast rotary motion,water spray,bur attached",
+      "segments": "seg_02,seg_03,seg_09",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_round_carbide_bur",
+    "text": "A round carbide bur is a rotating cutting bur used for removing decayed tooth structure and opening access through enamel and dentin. In segment 02, it helps excavate superficial and deep caries under water spray. Students may ask why the bur is round; its shape is useful for controlled caries removal and initial access.",
+    "metadata": {
+      "canonical_key": "round_carbide_bur",
+      "display_name": "Round carbide bur",
+      "visual_cues": "small round cutting tip,rotates in handpiece",
+      "segments": "seg_02",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_tapered_diamond_bur",
+    "text": "A tapered diamond bur is a rotary bur used to refine tooth preparation walls and shape the access or onlay preparation. In segment 03, it helps refine access cavity walls. In segment 09, it helps create a smooth, divergent onlay preparation with defined margins.",
+    "metadata": {
+      "canonical_key": "tapered_diamond_bur",
+      "display_name": "Tapered diamond bur",
+      "visual_cues": "tapered rotating bur,preparation refinement",
+      "segments": "seg_03,seg_09",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_endodontic_probe_explorer",
+    "text": "An endodontic probe or explorer is a slender pointed instrument used to feel the cavity floor and locate root canal orifices. In segment 03, it helps assess the pulp chamber floor after access opening. Students may also hear it called an endodontic explorer or dental explorer.",
+    "metadata": {
+      "canonical_key": "endodontic_probe_explorer",
+      "display_name": "Endodontic probe or explorer",
+      "visual_cues": "thin pointed tip,hand instrument,probing motion",
+      "segments": "seg_03,seg_12",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_endodontic_rotary_handpiece",
+    "text": "An endodontic rotary handpiece drives rotary files during canal shaping. In segment 05, it is used to sequentially shape and clean the root canals. Its purpose is different from the high-speed handpiece because it is used inside canals rather than for cutting broad tooth structure.",
+    "metadata": {
+      "canonical_key": "endodontic_rotary_handpiece",
+      "display_name": "Endodontic rotary handpiece",
+      "visual_cues": "slow controlled rotation,rotary file attached",
+      "segments": "seg_05",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_rotary_files",
+    "text": "Rotary files are flexible endodontic instruments used to shape and clean root canals. In segment 05, they enlarge the canals in sequence while irrigation removes debris and disinfects. Students may ask what is going into the canal; these are files designed to follow the canal path.",
+    "metadata": {
+      "canonical_key": "rotary_files",
+      "display_name": "Rotary files",
+      "visual_cues": "thin flexible metal files,enter root canal",
+      "segments": "seg_05",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_irrigation_syringe",
+    "text": "An irrigation syringe delivers fluid into the canal space during root canal cleaning. In segment 05, it is used with sodium hypochlorite between file sizes to flush debris and disinfect the canal. Students may ask what the syringe is doing; it is irrigating, not giving anesthesia.",
+    "metadata": {
+      "canonical_key": "irrigation_syringe",
+      "display_name": "Irrigation syringe",
+      "visual_cues": "syringe tip near canal,fluid delivery",
+      "segments": "seg_05",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_paper_points",
+    "text": "Paper points are small absorbent points used to dry root canals after irrigation. In segment 05, they are placed into the canals before obturation so gutta-percha and sealer can work in a dry canal environment. Students may ask why the canals are dried; moisture can interfere with sealing.",
+    "metadata": {
+      "canonical_key": "paper_points",
+      "display_name": "Paper points",
+      "visual_cues": "small white absorbent points,placed into canals",
+      "segments": "seg_05",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_endodontic_plugger",
+    "text": "An endodontic plugger is used to compact gutta-percha during canal obturation. In segment 06, compaction helps adapt the filling material into the canal space and improve the seal. It is part of the filling stage after cleaning and drying.",
+    "metadata": {
+      "canonical_key": "endodontic_plugger",
+      "display_name": "Endodontic plugger",
+      "visual_cues": "hand instrument,compacts gutta-percha",
+      "segments": "seg_06",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_tweezers",
+    "text": "Tweezers are used to handle small dental materials cleanly and precisely. In segment 06, they help place or handle gutta-percha cones during canal obturation. They are useful when direct finger placement would be imprecise.",
+    "metadata": {
+      "canonical_key": "tweezers",
+      "display_name": "Tweezers",
+      "visual_cues": "small grasping instrument,holds cones",
+      "segments": "seg_06",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_tofflemire_matrix_retainer",
+    "text": "A Tofflemire matrix retainer holds a matrix band around a posterior tooth to help create proper contours while restorative material is placed. In segment 07, it helps establish the tooth shape before bonding and composite build-up. Students may ask why a band is around the tooth; it helps control the wall and contour of the restoration.",
+    "metadata": {
+      "canonical_key": "tofflemire_matrix_retainer",
+      "display_name": "Tofflemire matrix retainer",
+      "visual_cues": "metal retainer,band around molar",
+      "segments": "seg_07,seg_09",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_microbrush",
+    "text": "A microbrush is a small disposable applicator used to place etchants, adhesives, silane, or other liquids precisely. In this video, it appears during bonding, composite workflow, ceramic pre-treatment, and onlay seating. Students may recognize it as the tiny brush used to paint liquid onto tooth or ceramic surfaces.",
+    "metadata": {
+      "canonical_key": "microbrush",
+      "display_name": "Microbrush",
+      "visual_cues": "small brush tip,paint-on liquid application",
+      "segments": "seg_07,seg_08,seg_11,seg_12",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_dental_curing_light",
+    "text": "A dental curing light hardens light-activated materials such as bonding adhesive, composite resin, and some cements. In the video, it is used after bonding, during composite core build-up, and during final finishing. Students may ask why cure in layers; the light helps each increment harden properly.",
+    "metadata": {
+      "canonical_key": "dental_curing_light",
+      "display_name": "Dental curing light",
+      "visual_cues": "blue light,held near restoration",
+      "segments": "seg_07,seg_08,seg_13",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_composite_placement_instrument",
+    "text": "A composite placement instrument adapts composite resin into the prepared cavity. In segment 08, it helps place and shape each increment against the cavity walls to reduce voids before light curing. Students may ask why the material is placed in small amounts; incremental placement helps adaptation and curing.",
+    "metadata": {
+      "canonical_key": "composite_placement_instrument",
+      "display_name": "Composite placement instrument",
+      "visual_cues": "hand instrument,adapts composite resin",
+      "segments": "seg_08",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_impression_tray",
+    "text": "An impression tray holds impression material while it captures the shape of the prepared tooth and surrounding area. In segment 10, the tray works with silicone impression material to record the onlay preparation. Students may ask why an impression is made; it allows fabrication of a restoration that fits the preparation.",
+    "metadata": {
+      "canonical_key": "impression_tray",
+      "display_name": "Impression tray",
+      "visual_cues": "tray loaded with impression material",
+      "segments": "seg_10",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_air_water_syringe",
+    "text": "An air-water syringe rinses and dries tooth or restoration surfaces. In segment 11, it is used during ceramic onlay pre-treatment after hydrofluoric acid etching. Controlled rinsing and drying help prepare the ceramic surface before silane application.",
+    "metadata": {
+      "canonical_key": "air_water_syringe",
+      "display_name": "Air-water syringe",
+      "visual_cues": "air or water spray,rinsing,drying",
+      "segments": "seg_11",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "instrument_low_speed_handpiece_polishing_cup",
+    "text": "A low-speed handpiece with a polishing cup is used for finishing and polishing restoration margins. In segment 13, it helps smooth the restoration boundary after curing. Students may ask why polish at the end; polishing improves surface smoothness and cleans the margins.",
+    "metadata": {
+      "canonical_key": "low_speed_handpiece_polishing_cup",
+      "display_name": "Low-speed handpiece and polishing cup",
+      "visual_cues": "slow rotary polishing,cup at restoration margin",
+      "segments": "seg_13",
+      "source_status": "ai_generated_demo"
+    }
+  }
+]

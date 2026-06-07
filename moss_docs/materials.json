@@ -1,0 +1,178 @@
+[
+  {
+    "id": "material_local_anesthetic",
+    "text": "Local anesthetic is medication used to numb the treatment area before dental procedures. In segment 01, it is injected near the target molar so the patient stays comfortable during drilling, root canal treatment, and restoration.",
+    "metadata": {
+      "canonical_key": "local_anesthetic",
+      "display_name": "Local anesthetic",
+      "segments": "seg_01",
+      "related_terms": "dental syringe,anesthesia,gingiva",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_water_coolant",
+    "text": "Water coolant is sprayed during high-speed drilling to reduce heat, wash debris, and improve visibility. In segment 02, water spray is used while removing caries with a high-speed handpiece and round carbide bur. Students may ask why use water spray; it helps protect the tooth from heat and clears the field.",
+    "metadata": {
+      "canonical_key": "water_coolant",
+      "display_name": "Water coolant",
+      "segments": "seg_02",
+      "related_terms": "high-speed handpiece,round carbide bur,caries removal",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_rubber_dam_sheet",
+    "text": "A rubber dam sheet isolates the treated tooth from saliva and protects the airway during endodontic work. In segment 04, rubber dam isolation helps keep the canal system cleaner and prevents small instruments or fluids from entering the mouth. Students may ask why rubber dam; it is for isolation, contamination control, and safety.",
+    "metadata": {
+      "canonical_key": "rubber_dam_sheet",
+      "display_name": "Rubber dam sheet",
+      "segments": "seg_04",
+      "related_terms": "isolation,endodontics,root canal",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_sodium_hypochlorite",
+    "text": "Sodium hypochlorite is an irrigating solution used in root canal treatment to disinfect canals and help dissolve organic tissue remnants. In segment 05, it is used between rotary file sizes while shaping and cleaning the canals. Students may ask what is sodium hypochlorite; in this context, it is the disinfecting root canal rinse.",
+    "metadata": {
+      "canonical_key": "sodium_hypochlorite",
+      "display_name": "Sodium hypochlorite",
+      "segments": "seg_05",
+      "related_terms": "irrigation,root canals,rotary files,irrigation syringe",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_paper_points",
+    "text": "Paper points are absorbent paper cones used to dry root canals after irrigation. In segment 05, they remove moisture before obturation. A dry canal helps the sealer and gutta-percha create a better seal.",
+    "metadata": {
+      "canonical_key": "paper_points",
+      "display_name": "Paper points",
+      "segments": "seg_05",
+      "related_terms": "canal drying,obturation,gutta-percha",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_gutta_percha_cones",
+    "text": "Gutta-percha cones are rubber-like filling cones used to obturate cleaned root canals. In segment 06, master cones coated with sealer are fitted and compacted to fill the canal space. Students may ask what is gutta-percha; it is the main root canal filling material.",
+    "metadata": {
+      "canonical_key": "gutta_percha_cones",
+      "display_name": "Gutta-percha cones",
+      "segments": "seg_06",
+      "related_terms": "obturation,endodontic sealer,root canals,plugger",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_endodontic_sealer",
+    "text": "Endodontic sealer is used with gutta-percha to fill small spaces between the cone and canal wall. In segment 06, gutta-percha master cones are coated with sealer before compaction. The goal is a tight three-dimensional seal of the root canal system.",
+    "metadata": {
+      "canonical_key": "endodontic_sealer",
+      "display_name": "Endodontic sealer",
+      "segments": "seg_06",
+      "related_terms": "gutta-percha,obturation,root canals",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_phosphoric_acid_gel",
+    "text": "Phosphoric acid gel etches enamel and dentin before adhesive bonding. In segment 07, it is applied to the cavity walls, then rinsed and gently dried before bonding adhesive. Students may ask why etch; etching prepares the tooth surface so adhesive can bond more effectively.",
+    "metadata": {
+      "canonical_key": "phosphoric_acid_gel",
+      "display_name": "Phosphoric acid gel",
+      "segments": "seg_07",
+      "related_terms": "etching,bonding adhesive,enamel,dentin",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_bonding_adhesive",
+    "text": "Bonding adhesive is a resin material that helps composite or cement attach to tooth structure. In segment 07, adhesive is applied after etching and before composite build-up. In segment 12, adhesive is used again during onlay seating. It is part of the bond between tooth, core, cement, and final restoration.",
+    "metadata": {
+      "canonical_key": "bonding_adhesive",
+      "display_name": "Bonding adhesive",
+      "segments": "seg_07,seg_12",
+      "related_terms": "etching,composite resin,luting cement,onlay",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_composite_resin",
+    "text": "Composite resin is a tooth-colored restorative material placed into the prepared cavity to build the core. In segment 08, it is placed incrementally, adapted against the walls, and light-cured. Students may ask why cure in layers; each layer needs enough light exposure to harden properly and reduce voids.",
+    "metadata": {
+      "canonical_key": "composite_resin",
+      "display_name": "Composite resin",
+      "segments": "seg_08",
+      "related_terms": "composite core build-up,dental curing light,onlay preparation",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_silicone_impression_material",
+    "text": "Silicone impression material records the details of the prepared tooth for restoration fabrication. In segment 10, it is dispensed around the onlay preparation and captured in an impression tray. Accuracy matters because the ceramic onlay must fit the prepared margins.",
+    "metadata": {
+      "canonical_key": "silicone_impression_material",
+      "display_name": "Silicone impression material",
+      "segments": "seg_10",
+      "related_terms": "impression tray,onlay preparation,master impression",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_ceramic_onlay",
+    "text": "A ceramic onlay is the indirect restoration seated onto the prepared molar after root canal treatment and core build-up. In segment 11, its internal surface is pre-treated before bonding. In segment 12, it is loaded with luting cement and seated on the tooth.",
+    "metadata": {
+      "canonical_key": "ceramic_onlay",
+      "display_name": "Ceramic onlay",
+      "segments": "seg_11,seg_12",
+      "related_terms": "onlay preparation,hydrofluoric acid etch,silane,luting cement",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_hydrofluoric_acid_etch_gel",
+    "text": "Hydrofluoric acid etch gel is used to pre-treat the internal surface of ceramic restorations. In segment 11, it prepares the ceramic onlay before rinsing and silane application. This is different from phosphoric acid etching on tooth structure.",
+    "metadata": {
+      "canonical_key": "hydrofluoric_acid_etch_gel",
+      "display_name": "Hydrofluoric acid etch gel",
+      "segments": "seg_11",
+      "related_terms": "ceramic onlay,silane,ceramic bonding",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_silane_coupling_agent",
+    "text": "Silane coupling agent is applied to etched ceramic to improve bonding between the ceramic onlay and resin cement. In segment 11, it follows hydrofluoric acid etching and rinsing. Students may ask why use silane; it helps chemically connect ceramic and resin-based cement.",
+    "metadata": {
+      "canonical_key": "silane_coupling_agent",
+      "display_name": "Silane coupling agent",
+      "segments": "seg_11",
+      "related_terms": "ceramic onlay,hydrofluoric acid etch,luting cement,bond strength",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_luting_cement",
+    "text": "Luting cement is used to seat and retain the ceramic onlay on the prepared tooth. In segment 12, the onlay is loaded with cement, seated firmly, and excess cement is cleaned away. Cement cleanup is important so margins are not left bulky or irritating.",
+    "metadata": {
+      "canonical_key": "luting_cement",
+      "display_name": "Luting cement",
+      "segments": "seg_12",
+      "related_terms": "ceramic onlay,bonding adhesive,cement cleanup,margins",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "material_polishing_paste",
+    "text": "Polishing paste is used with polishing cups or points to smooth restoration margins and surfaces. In segment 13, it supports the finishing and polishing stage after the onlay has been seated and cured. A smoother margin improves comfort and plaque resistance for the demo explanation.",
+    "metadata": {
+      "canonical_key": "polishing_paste",
+      "display_name": "Polishing paste",
+      "segments": "seg_13",
+      "related_terms": "polishing cup,finishing,restoration margins",
+      "source_status": "ai_generated_demo"
+    }
+  }
+]

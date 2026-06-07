@@ -1,0 +1,92 @@
+[
+  {
+    "id": "anatomy_enamel",
+    "text": "Enamel is the hard outer layer of the tooth crown. During caries removal and access preparation, enamel is usually the first structure entered before reaching dentin. Students should distinguish enamel from dentin because enamel is harder and more brittle, while dentin is deeper and closer to the pulp chamber.",
+    "metadata": {
+      "canonical_key": "enamel",
+      "display_name": "Enamel",
+      "related_terms": "dentin,caries,access cavity",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "anatomy_dentin",
+    "text": "Dentin is the mineralized layer beneath enamel and around the pulp chamber. If a student asks what is dentin, explain that it forms much of the tooth body and sits closer to the pulp than enamel. In the video, infected dentin is removed during decay excavation while sound dentin should be preserved. If a student asks why did they stop drilling, a key idea is that the operator removes soft infected dentin but avoids unnecessary deeper cutting toward the pulp chamber.",
+    "metadata": {
+      "canonical_key": "dentin",
+      "display_name": "Dentin",
+      "related_terms": "enamel,pulp chamber,caries,infected dentin",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "anatomy_pulp_chamber",
+    "text": "The pulp chamber is the central space inside the tooth crown that connects to the root canal system. In root canal access, the dentist removes decay and tooth structure to expose the pulp chamber floor and locate canal orifices. Students may ask what is the pulp chamber or where are they drilling; the access cavity is directed toward this internal chamber.",
+    "metadata": {
+      "canonical_key": "pulp_chamber",
+      "display_name": "Pulp chamber",
+      "related_terms": "access cavity,root canals,root canal orifices,dentin",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "anatomy_root_canals",
+    "text": "Root canals are the narrow spaces inside the roots that contain pulpal tissue before endodontic treatment. In this procedure, the canals are shaped with rotary files, irrigated with sodium hypochlorite, dried with paper points, and filled with gutta-percha and sealer. They are the main internal spaces treated during the root canal portion of the video.",
+    "metadata": {
+      "canonical_key": "root_canals",
+      "display_name": "Root canals",
+      "related_terms": "pulp chamber,rotary files,sodium hypochlorite,gutta-percha",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "anatomy_root_canal_orifices",
+    "text": "Root canal orifices are the small entry points from the pulp chamber floor into each root canal. The operator uses an endodontic probe or explorer to locate these openings after access is created. Finding canal orifices is important because missed canals can leave untreated tissue or infection behind.",
+    "metadata": {
+      "canonical_key": "root_canal_orifices",
+      "display_name": "Root canal orifices",
+      "related_terms": "pulp chamber,root canals,endodontic probe,access cavity",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "anatomy_gingiva",
+    "text": "Gingiva is the gum tissue around the teeth. In the anesthesia segment, local anesthetic is injected into the mucobuccal fold adjacent to the target molar, near the gingival tissues. This helps numb the area before drilling and endodontic treatment begins.",
+    "metadata": {
+      "canonical_key": "gingiva",
+      "display_name": "Gingiva",
+      "related_terms": "local anesthetic,dental syringe,mandibular molars",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "anatomy_mandibular_molars",
+    "text": "Mandibular molars are the back teeth in the lower jaw. In this video, the target tooth is treated as a molar requiring root canal therapy followed by ceramic onlay restoration. Molars often have multiple cusps and multiple root canals, so access, shaping, and restoration design matter.",
+    "metadata": {
+      "canonical_key": "mandibular_molars",
+      "display_name": "Mandibular molars",
+      "related_terms": "molar tooth,root canals,onlay,cusps",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "anatomy_molar_crown",
+    "text": "The molar crown is the visible portion of the molar above the gumline. The access cavity, caries excavation, composite core build-up, and onlay preparation all involve the crown. Weakened cusps in the crown may be reduced so the ceramic onlay can protect the tooth.",
+    "metadata": {
+      "canonical_key": "molar_crown",
+      "display_name": "Molar crown",
+      "related_terms": "onlay preparation,cusps,enamel,dentin",
+      "source_status": "ai_generated_demo"
+    }
+  },
+  {
+    "id": "anatomy_molar_cavity",
+    "text": "A molar cavity is the prepared space left after decay removal and access preparation in the molar tooth. In the video, composite resin is placed into this cavity incrementally to rebuild the core. Students may ask why the cavity is being filled before the onlay; the build-up creates a stable foundation for the final restoration.",
+    "metadata": {
+      "canonical_key": "molar_cavity",
+      "display_name": "Molar cavity",
+      "related_terms": "composite resin,core build-up,caries removal,onlay",
+      "source_status": "ai_generated_demo"
+    }
+  }
+]
