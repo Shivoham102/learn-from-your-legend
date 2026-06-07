@@ -1,0 +1,261 @@
+{
+  "procedure": "Root Canal Therapy and Ceramic Onlay Placement",
+  "total_duration": "03:54",
+  "segments": [
+    {
+      "id": "seg_01",
+      "start": "00:00",
+      "end": "00:08",
+      "phase": "anesthesia",
+      "step_name": "Local anesthesia injection",
+      "context": "Administer local anesthesia into the mucobuccal fold adjacent to the target molar to ensure patient comfort.",
+      "instruments": [
+        "dental syringe"
+      ],
+      "anatomy": [
+        "gingiva",
+        "mandibular molars"
+      ],
+      "materials": [
+        "local anesthetic"
+      ],
+      "key_moment": "00:01"
+    },
+    {
+      "id": "seg_02",
+      "start": "00:08",
+      "end": "00:29",
+      "phase": "caries removal",
+      "step_name": "Decay removal and access cavity preparation",
+      "context": "Use a high-speed handpiece with a round carbide bur under water spray to carefully remove superficial and deep caries. Ensure you completely eliminate infected dentin while maintaining healthy tooth structure.",
+      "instruments": [
+        "high-speed handpiece",
+        "round carbide bur"
+      ],
+      "anatomy": [
+        "molar tooth",
+        "enamel",
+        "dentin"
+      ],
+      "materials": [
+        "water coolant"
+      ],
+      "key_moment": "00:24"
+    },
+    {
+      "id": "seg_03",
+      "start": "00:29",
+      "end": "00:52",
+      "phase": "cavity prep",
+      "step_name": "Access opening and pulp chamber exposure",
+      "context": "Assess the cavity floor with an endodontic explorer to locate canal orifices. Next, refine the access cavity walls and fully expose the pulp chamber floor using a tapered diamond bur to establish straight-line access.",
+      "instruments": [
+        "endodontic probe",
+        "high-speed handpiece",
+        "tapered diamond bur"
+      ],
+      "anatomy": [
+        "pulp chamber",
+        "root canal orifices"
+      ],
+      "materials": [],
+      "key_moment": "00:44"
+    },
+    {
+      "id": "seg_04",
+      "start": "00:52",
+      "end": "01:00",
+      "phase": "isolation",
+      "step_name": "Rubber dam isolation",
+      "context": "Apply a rubber dam to isolate the treated tooth, preventing moisture contamination and protecting the airway.",
+      "instruments": [],
+      "anatomy": [
+        "molar tooth"
+      ],
+      "materials": [
+        "rubber dam sheet"
+      ],
+      "key_moment": "00:54"
+    },
+    {
+      "id": "seg_05",
+      "start": "01:00",
+      "end": "01:29",
+      "phase": "endodontics",
+      "step_name": "Canal shaping and irrigation",
+      "context": "Shape and clean the root canals sequentially using endodontic rotary files. Irrigate copiously with sodium hypochlorite solution between file sizes to dissolve necrotic tissue and disinfect the canal space. Finally, dry the canals completely with sterile paper points.",
+      "instruments": [
+        "endodontic rotary handpiece",
+        "rotary files",
+        "irrigation syringe",
+        "paper points"
+      ],
+      "anatomy": [
+        "root canals",
+        "pulp chamber"
+      ],
+      "materials": [
+        "sodium hypochlorite",
+        "paper points"
+      ],
+      "key_moment": "01:25"
+    },
+    {
+      "id": "seg_06",
+      "start": "01:29",
+      "end": "01:48",
+      "phase": "endodontics",
+      "step_name": "Canal obturation",
+      "context": "Obturate the clean, dry root canals by fitting gutta-percha master cones coated with sealer. Compact the gutta-percha to ensure a tight, three-dimensional seal of the apical and lateral canal spaces.",
+      "instruments": [
+        "endodontic plugger",
+        "tweezers"
+      ],
+      "anatomy": [
+        "root canals"
+      ],
+      "materials": [
+        "gutta-percha cones",
+        "endodontic sealer"
+      ],
+      "key_moment": "01:31"
+    },
+    {
+      "id": "seg_07",
+      "start": "01:48",
+      "end": "02:11",
+      "phase": "cavity prep",
+      "step_name": "Matrix band application, etching, and bonding",
+      "context": "Position a Tofflemire matrix band to establish proper contours. Acid-etch the enamel and dentin walls, rinse and dry gently, then apply a dental bonding adhesive, ensuring even coverage before light-curing.",
+      "instruments": [
+        "Tofflemire matrix retainer",
+        "microbrush",
+        "dental curing light"
+      ],
+      "anatomy": [
+        "molar tooth"
+      ],
+      "materials": [
+        "phosphoric acid gel",
+        "bonding adhesive"
+      ],
+      "key_moment": "02:09"
+    },
+    {
+      "id": "seg_08",
+      "start": "02:11",
+      "end": "02:38",
+      "phase": "filling",
+      "step_name": "Composite core build-up",
+      "context": "Build up the tooth core by placing composite resin incrementally into the cavity. Carefully adapt each composite layer against the walls to avoid voids, and light-cure each increment thoroughly to establish a solid foundation for the onlay.",
+      "instruments": [
+        "composite placement instrument",
+        "dental curing light",
+        "microbrush"
+      ],
+      "anatomy": [
+        "molar tooth cavity"
+      ],
+      "materials": [
+        "composite resin"
+      ],
+      "key_moment": "02:24"
+    },
+    {
+      "id": "seg_09",
+      "start": "02:38",
+      "end": "03:10",
+      "phase": "cavity prep",
+      "step_name": "Onlay preparation",
+      "context": "Remove the matrix band. Use a tapered diamond bur in a high-speed handpiece to prepare the tooth for an onlay. Reduce the weakened cusps and create a smooth, divergent internal preparation with well-defined margins to ensure a strong path of insertion.",
+      "instruments": [
+        "Tofflemire retainer",
+        "high-speed handpiece",
+        "tapered diamond bur"
+      ],
+      "anatomy": [
+        "molar tooth crown"
+      ],
+      "materials": [],
+      "key_moment": "03:00"
+    },
+    {
+      "id": "seg_10",
+      "start": "03:10",
+      "end": "03:19",
+      "phase": "impression",
+      "step_name": "Elastomeric impression",
+      "context": "Dispense elastomeric impression material around the preparation to capture a highly accurate master impression of the tooth.",
+      "instruments": [
+        "impression tray",
+        "syringe"
+      ],
+      "anatomy": [
+        "molar tooth"
+      ],
+      "materials": [
+        "silicone impression material"
+      ],
+      "key_moment": "03:15"
+    },
+    {
+      "id": "seg_11",
+      "start": "03:19",
+      "end": "03:32",
+      "phase": "cementation",
+      "step_name": "Ceramic onlay pre-treatment",
+      "context": "Pre-treat the ceramic onlay's internal surface by applying hydrofluoric acid etching gel, rinsing it, and applying a silane coupling agent to optimize bond strength.",
+      "instruments": [
+        "microbrush",
+        "air-water syringe"
+      ],
+      "anatomy": [],
+      "materials": [
+        "ceramic onlay",
+        "hydrofluoric acid etch gel",
+        "silane coupling agent"
+      ],
+      "key_moment": "03:24"
+    },
+    {
+      "id": "seg_12",
+      "start": "03:32",
+      "end": "03:45",
+      "phase": "cementation",
+      "step_name": "Adhesive application and onlay seating",
+      "context": "Apply adhesive to the tooth preparation, load the onlay with luting cement, seat it firmly, and clean away any excess cement.",
+      "instruments": [
+        "microbrush",
+        "dental explorer"
+      ],
+      "anatomy": [
+        "molar tooth"
+      ],
+      "materials": [
+        "bonding adhesive",
+        "luting cement"
+      ],
+      "key_moment": "03:35"
+    },
+    {
+      "id": "seg_13",
+      "start": "03:45",
+      "end": "03:54",
+      "phase": "finishing",
+      "step_name": "Curing, finishing, and polishing",
+      "context": "Cure all margins thoroughly with light, then finish and polish the restoration boundaries using polishing cups and points.",
+      "instruments": [
+        "dental curing light",
+        "low-speed handpiece",
+        "polishing cup"
+      ],
+      "anatomy": [
+        "molar tooth"
+      ],
+      "materials": [
+        "polishing paste"
+      ],
+      "key_moment": "03:49"
+    }
+  ]
+}
