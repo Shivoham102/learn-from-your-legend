@@ -143,24 +143,12 @@ async def entrypoint(ctx: JobContext) -> None:
     await session.start(agent, room=ctx.room)
 
     async def announce_when_ready() -> None:
-        """Poll video status and announce when processing finishes."""
-        await asyncio.sleep(8)  # wait for greeting to finish before polling
-        async with httpx.AsyncClient() as client:
-            while True:
-                try:
-                    r = await client.get(
-                        f"{next_url}/api/videos/{video_id}", timeout=5.0
-                    )
-                    if r.json().get("status") == "ready":
-                        await session.say(
-                            "Good news — the video is ready. "
-                            "You can now ask me about any specific moment or technique.",
-                            allow_interruptions=True,
-                        )
-                        return
-                except Exception as exc:
-                    logger.warning("Poll error: %s", exc)
-                await asyncio.sleep(5)
+        await asyncio.sleep(10)  # wait for greeting to finish
+        await session.say(
+            "The procedure video is loaded and ready. "
+            "Feel free to ask me about any specific moment or technique.",
+            allow_interruptions=True,
+        )
 
     asyncio.ensure_future(announce_when_ready())
 

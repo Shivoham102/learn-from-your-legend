@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Lightbulb, Send, Sparkles } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Lightbulb, Sparkles } from "lucide-react";
 import type { ChatMessage, UIAction } from "@/types/dental";
 import { getActionLabel } from "@/lib/uiActions";
 import KnowledgeCard from "./KnowledgeCard";
@@ -43,19 +43,11 @@ export default function AITutorPanel({
   onCloseProcedureCard,
   termCards = [],
 }: AITutorPanelProps) {
-  const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading, procedureCard, termCards]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
-    onSendMessage(input.trim());
-    setInput("");
-  };
 
   const hasContextCards =
     procedureCard || termCards.length > 0 || highlightedTerms.length > 0;
@@ -215,26 +207,6 @@ export default function AITutorPanel({
         <VoiceAgent />
       </div>
 
-      <form onSubmit={handleSubmit} className="shrink-0 border-t border-[#E6ECEF] p-4">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask the AI tutor..."
-            disabled={isLoading}
-            className="flex-1 rounded-xl border border-[#E6ECEF] bg-[#F7FAF9] px-4 py-2.5 text-sm text-[#1F2933] placeholder:text-[#667085] focus:border-[#4A90E2]/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4A90E2]/20 disabled:opacity-50"
-          />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            className="flex items-center gap-1.5 rounded-xl bg-[#2DB6A3] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#259688] disabled:opacity-40"
-          >
-            <Send className="h-4 w-4" strokeWidth={2} />
-            Send
-          </button>
-        </div>
-      </form>
     </div>
   );
 }

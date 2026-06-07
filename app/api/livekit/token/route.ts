@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AccessToken } from "livekit-server-sdk";
+import { AccessToken, AgentDispatchClient } from "livekit-server-sdk";
 import { getLiveKitConfig, isLiveKitConfigured } from "@/lib/livekit";
 
 export { isLiveKitConfigured };
@@ -26,6 +26,14 @@ async function generateToken(roomName: string, participantName: string) {
   });
   at.addGrant({ room: roomName, roomJoin: true, canPublish: true, canSubscribe: true });
   const jwt = await at.toJwt();
+
+  // Dispatch the agent — convert wss:// → https:// for REST client
+  const httpUrl = url.replace(/^wss?:\/\//, "https://");
+  const dispatch = new AgentDispatchClient(httpUrl, apiKey, apiSecret);
+  await dispatch.createDispatch(roomName, "dental-coach").catch(() => {
+    // Ignore if already dispatched (room already has agent)
+  });
+
   return { token: jwt, serverUrl: url, url, mock: false, roomName, participantName };
 }
 
