@@ -1,6 +1,8 @@
+import asyncio
 import logging
 import os
 import re
+from typing import Any
 
 from dotenv import load_dotenv
 from pathlib import Path
@@ -29,6 +31,7 @@ from livekit.agents import (
     Agent,
     AgentSession,
     JobContext,
+    RunContext,
     WorkerOptions,
     cli,
     function_tool,
@@ -169,8 +172,13 @@ get_current_segment(): call FIRST when asked what is on screen now, what step, w
 or what anatomy is involved.
 search_video(query): call before answering any question about a technique, instrument, material,
 or why a step is done. Use this for all knowledge questions.
-seek_to_segment(name): use this — not rewind_video — when the user mentions a section or step by
-name (e.g. "decay removal", "rubber dam", "obturation"). It finds the exact start from the JSON.
+seek_to_segment(name): call this whenever the user asks ABOUT or asks to SEE a named segment
+(e.g. "explain decay removal", "what is rubber dam", "show me obturation"). Always call this
+BEFORE answering so the video shows the relevant segment while you explain. Use the step name
+from the JSON as the argument.
+resume_from_question(): ALWAYS call this after answering any knowledge question — it returns
+the video to where the user was and resumes playback. Only skip it for pure navigation commands
+("take me to X", "skip to Y") where the user wants to stay at the new position.
 check_video_status(): check if video finished processing.
 play_video() / pause_video() / rewind_video(seconds) / forward_video(seconds) / seek_video(timestamp)"""
 
@@ -188,9 +196,56 @@ class DentalAgent(Agent):
         else:
             self._moss = None
         self._moss_loaded = False
+        self._last_announced_segment_id: str | None = None
+        self._announce_timer: asyncio.TimerHandle | None = None
+        self._announce_handle: Any = None
+        self._loop: asyncio.AbstractEventLoop | None = None
+        self._pre_question_time_s: float | None = None
+        self._in_question: bool = False
 
     def update_timestamp(self, ts: float) -> None:
         self._current_time_s = ts
+        if self._in_question:
+            return
+        seg = _find_segment(ts)
+        if seg is None:
+            self._last_announced_segment_id = None
+            if self._announce_timer is not None:
+                self._announce_timer.cancel()
+                self._announce_timer = None
+            return
+        seg_id = seg.get("id")
+        if seg_id == self._last_announced_segment_id:
+            return
+        self._last_announced_segment_id = seg_id
+        if self._loop is None:
+            return
+        if self._announce_timer is not None:
+            self._announce_timer.cancel()
+        self._announce_timer = self._loop.call_later(1.2, self._fire_announce, seg)
+
+    def _fire_announce(self, seg: dict) -> None:
+        self._announce_timer = None
+        if self._announce_handle is not None and not self._announce_handle.done():
+            try:
+                self._announce_handle.interrupt(force=True)
+            except Exception:
+                pass
+        step = seg.get("step_name", "")
+        context = seg.get("context", "")
+        phase = seg.get("phase", "")
+        try:
+            self._announce_handle = self.session.generate_reply(
+                instructions=(
+                    f"The video just entered a new segment: '{step}' (phase: {phase}). "
+                    f"Context: {context}. "
+                    "Say 1-2 short plain-English sentences introducing what's happening. "
+                    "No lists, no markdown, no timestamps."
+                ),
+                allow_interruptions=True,
+            )
+        except Exception as exc:
+            logger.error("Segment announce failed for '%s': %s", seg.get("id"), exc)
 
     @function_tool()
     async def get_current_segment(self) -> str:
@@ -210,10 +265,46 @@ class DentalAgent(Agent):
         })
 
     async def on_enter(self) -> None:
+        self._loop = asyncio.get_running_loop()
+        seg = _find_segment(self._current_time_s)
+        if seg:
+            self._last_announced_segment_id = seg.get("id")
         await self.session.say(
             "Hi, I'm your dental study assistant. Ask me anything as you watch.",
             allow_interruptions=True,
         )
+
+    async def on_user_turn_completed(self, turn_ctx: Any, new_message: Any) -> None:
+        self._pre_question_time_s = self._current_time_s
+        self._in_question = True
+        if self._announce_timer is not None:
+            self._announce_timer.cancel()
+            self._announce_timer = None
+        logger.info(
+            "[Q&A] user turn completed — saved position=%.1fs, pausing video",
+            self._pre_question_time_s,
+        )
+        await self._send_video_command({"action": "pause"})
+
+    def handle_interrupt(self) -> None:
+        if self._loop:
+            self._loop.create_task(self._do_interrupt())
+
+    async def _do_interrupt(self) -> None:
+        try:
+            await self.session.interrupt()
+        except Exception:
+            pass
+
+    async def on_exit(self) -> None:
+        if self._announce_timer is not None:
+            self._announce_timer.cancel()
+            self._announce_timer = None
+        if self._announce_handle is not None and not self._announce_handle.done():
+            try:
+                self._announce_handle.interrupt(force=True)
+            except Exception:
+                pass
 
     async def _send_video_command(self, command: dict) -> None:
         """Publish a structured video-control command to the frontend over the
@@ -288,11 +379,36 @@ class DentalAgent(Agent):
                 best_seg = seg
 
         if not best_seg or best_score == 0:
+            logger.warning("[seek_to_segment] no match for query=%r — available: %s", name,
+                           [s.get("step_name") for s in _PROCEDURE_SEGMENTS])
             return f"No segment matched '{name}'. Available: {', '.join(s.get('step_name','') for s in _PROCEDURE_SEGMENTS)}"
 
         start_s = _mm_ss_to_s(best_seg.get("start", "0:00"))
+        logger.info("[seek_to_segment] query=%r → matched=%r score=%d seeking to %.1fs",
+                    name, best_seg.get("step_name"), best_score, start_s)
         await self._send_video_command({"action": "seek", "timestamp": start_s})
         return f"Jumped to '{best_seg.get('step_name')}' (starts at {best_seg.get('start')})."
+
+    @function_tool()
+    async def resume_from_question(self, context: RunContext) -> str:
+        """Return to the video position the user was at before asking their question and resume playback.
+        Call this after finishing any knowledge explanation. Do NOT call after navigation commands."""
+        ts = self._pre_question_time_s if self._pre_question_time_s is not None else self._current_time_s
+        logger.info(
+            "[resume_from_question] called — waiting for playout then returning to %.1fs (pre_question=%.1fs, current=%.1fs)",
+            ts,
+            self._pre_question_time_s if self._pre_question_time_s is not None else -1,
+            self._current_time_s,
+        )
+        await context.wait_for_playout()
+        logger.info("[resume_from_question] playout done — seeking to %.1fs and playing", ts)
+        if self._announce_timer is not None:
+            self._announce_timer.cancel()
+            self._announce_timer = None
+        self._in_question = False
+        await self._send_video_command({"action": "seek", "timestamp": ts})
+        await self._send_video_command({"action": "play"})
+        return f"Resumed playback from {ts:.1f}s."
 
     @function_tool()
     async def check_video_status(self) -> str:
@@ -348,6 +464,8 @@ async def entrypoint(ctx: JobContext) -> None:
             payload = json.loads(data_packet.data.decode())
             if payload.get("type") == "video_timestamp":
                 agent.update_timestamp(float(payload["ts"]))
+            elif payload.get("type") == "user_interrupt":
+                agent.handle_interrupt()
         except Exception:
             pass
 
