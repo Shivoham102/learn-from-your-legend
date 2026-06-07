@@ -4,6 +4,7 @@ export type VoiceOrbState = "listening" | "user-speaking" | "ai-speaking";
 
 interface VoiceOrbProps {
   state?: VoiceOrbState;
+  onClick?: () => void;
 }
 
 const BAR_COUNT = 36;
@@ -33,21 +34,25 @@ function barAiHeight(index: number): number {
   return wave;
 }
 
-function statusLabel(state: VoiceOrbState): string {
+function statusLabel(state: VoiceOrbState, clickable: boolean): string {
   if (state === "ai-speaking") return "Explaining procedure…";
+  if (state === "user-speaking") return "Listening… tap to stop";
+  if (clickable) return "Tap to speak";
   return "I'm always listening";
 }
 
-export default function VoiceOrb({ state = "listening" }: VoiceOrbProps) {
+export default function VoiceOrb({ state = "listening", onClick }: VoiceOrbProps) {
   const isUser = state === "user-speaking";
   const isAi = state === "ai-speaking";
+  const isClickable = !!onClick;
 
   return (
     <div className="flex flex-col items-center gap-1.5 py-2">
       <div
-        className="voice-orb-stage relative flex h-14 w-full max-w-[380px] items-center justify-center sm:h-[72px]"
-        aria-label="Always-on AI voice agent"
-        role="img"
+        className={`voice-orb-stage relative flex h-14 w-full max-w-[380px] items-center justify-center sm:h-[72px] ${isClickable ? "cursor-pointer select-none" : ""}`}
+        aria-label={isUser ? "Recording — click to stop" : isAi ? "Agent speaking" : "Click to speak"}
+        role={isClickable ? "button" : "img"}
+        onClick={onClick}
       >
         {/* Waveform bars — behind orb */}
         <div
@@ -71,9 +76,10 @@ export default function VoiceOrb({ state = "listening" }: VoiceOrbProps) {
               <span
                 key={i}
                 className={`voice-orb-bar w-[5px] shrink-0 rounded-full sm:w-[6px] ${barClass}`}
+                suppressHydrationWarning
                 style={{
                   background: barGradient(i),
-                  height: `${baseHeight}px`,
+                  height: `${Math.round(baseHeight)}px`,
                   animationDelay: `${i * 0.045}s`,
                   opacity: isUser ? 0.94 : 0.82,
                 }}
@@ -117,7 +123,7 @@ export default function VoiceOrb({ state = "listening" }: VoiceOrbProps) {
       </div>
 
       <p className="text-xs font-medium text-[#1F2933]" aria-live="polite">
-        {statusLabel(state)}
+        {statusLabel(state, isClickable)}
       </p>
       <p className="text-[10px] text-[#667085]">Powered by Moss AI</p>
     </div>

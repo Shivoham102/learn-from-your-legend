@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Lightbulb, Send, Sparkles } from "lucide-react";
+import { Lightbulb, Sparkles } from "lucide-react";
 import type { ChatMessage, UIAction } from "@/types/dental";
 import { getActionLabel } from "@/lib/uiActions";
-import { useLiveKitVoice } from "@/lib/useLiveKitVoice";
 import KnowledgeCard from "./KnowledgeCard";
-import VoiceOrb, { type VoiceOrbState } from "./VoiceOrb";
+import { VoiceAgent, type VoiceTurn } from "./VoiceAgent";
 
 interface ProcedureCardData {
   title: string;
@@ -28,7 +27,6 @@ interface AITutorPanelProps {
   onSendMessage: (message: string) => void;
   isLoading?: boolean;
   highlightedTerms?: string[];
-  onRunDemo?: () => void;
   procedureCard?: ProcedureCardData | null;
   onCloseProcedureCard?: () => void;
   termCards?: TermCardData[];
@@ -39,54 +37,33 @@ export default function AITutorPanel({
   onSendMessage,
   isLoading = false,
   highlightedTerms = [],
-  onRunDemo,
   procedureCard,
   onCloseProcedureCard,
   termCards = [],
 }: AITutorPanelProps) {
-  const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { voiceState, error } = useLiveKitVoice();
+  const [voiceTurns, setVoiceTurns] = useState<VoiceTurn[]>([]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading, procedureCard, termCards]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
-    onSendMessage(input.trim());
-    setInput("");
-  };
+  }, [messages, voiceTurns, isLoading, procedureCard, termCards]);
 
   const hasContextCards =
     procedureCard || termCards.length > 0 || highlightedTerms.length > 0;
 
-  const orbState: VoiceOrbState = isLoading ? "ai-speaking" : voiceState;
-
   return (
     <div className="flex min-h-[500px] h-full flex-col rounded-2xl border border-[#E6ECEF] bg-white card-shadow">
       <div className="border-b border-[#E6ECEF] px-5 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#DDF5EF]">
-              <Sparkles className="h-5 w-5 text-[#2DB6A3]" strokeWidth={2} />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-[#1F2933]">
-                AI Dental Tutor
-              </h2>
-              <p className="text-xs text-[#667085]">Powered by Moss + LiveKit</p>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#DDF5EF]">
+            <Sparkles className="h-5 w-5 text-[#2DB6A3]" strokeWidth={2} />
           </div>
-          {onRunDemo && (
-            <button
-              onClick={onRunDemo}
-              className="rounded-lg border border-[#4A90E2]/30 bg-[#EAF4FF] px-3 py-1.5 text-xs font-medium text-[#4A90E2] transition hover:bg-[#DDF5EF]"
-            >
-              Run Demo
-            </button>
-          )}
+          <div>
+            <h2 className="text-sm font-semibold text-[#1F2933]">
+              AI Dental Tutor
+            </h2>
+            <p className="text-xs text-[#667085]">Powered by Moss + LiveKit</p>
+          </div>
         </div>
       </div>
 
@@ -154,8 +131,8 @@ export default function AITutorPanel({
         </div>
       )}
 
-      <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
-        {messages.length === 0 && (
+      <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+        {messages.length === 0 && voiceTurns.length === 0 && (
           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
             <p className="text-sm text-[#667085]">
               Ask about the procedure while you watch
@@ -165,6 +142,24 @@ export default function AITutorPanel({
             </p>
           </div>
         )}
+
+        {/* Voice transcripts — rendered in main chat area */}
+        {voiceTurns.map((turn, i) => (
+          <div
+            key={`voice-${i}`}
+            className={`flex ${turn.isAgent ? "justify-start" : "justify-end"}`}
+          >
+            <p
+              className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                turn.isAgent
+                  ? "border border-[#E6ECEF] bg-[#F7FAF9] text-[#1F2933]"
+                  : "bg-[#4A90E2] text-white"
+              }`}
+            >
+              {turn.text}
+            </p>
+          </div>
+        ))}
 
         {messages.map((msg) => (
           <div
@@ -216,32 +211,9 @@ export default function AITutorPanel({
       </div>
 
       <div className="shrink-0 border-t border-[#E6ECEF] bg-[#F7FAF9] px-4 py-2">
-        <VoiceOrb state={orbState} />
-        {error && (
-          <p className="mt-1 text-center text-[10px] text-red-500">{error}</p>
-        )}
+        <VoiceAgent onTurnsChange={setVoiceTurns} />
       </div>
 
-      <form onSubmit={handleSubmit} className="shrink-0 border-t border-[#E6ECEF] p-4">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask the AI tutor..."
-            disabled={isLoading}
-            className="flex-1 rounded-xl border border-[#E6ECEF] bg-[#F7FAF9] px-4 py-2.5 text-sm text-[#1F2933] placeholder:text-[#667085] focus:border-[#4A90E2]/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4A90E2]/20 disabled:opacity-50"
-          />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            className="flex items-center gap-1.5 rounded-xl bg-[#2DB6A3] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#259688] disabled:opacity-40"
-          >
-            <Send className="h-4 w-4" strokeWidth={2} />
-            Send
-          </button>
-        </div>
-      </form>
     </div>
   );
 }

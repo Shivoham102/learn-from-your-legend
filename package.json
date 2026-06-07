@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@livekit/components-react": "^2.9.21",
+    "@livekit/components-styles": "^1.2.0",
     "@moss-dev/moss": "^1.1.0",
     "@supabase/supabase-js": "^2.107.0",
     "livekit-client": "^2.19.1",
