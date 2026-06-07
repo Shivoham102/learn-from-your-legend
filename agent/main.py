@@ -20,10 +20,22 @@ for _name in _NOISY:
     _lg.propagate = False      # records never reach root — survives any basicConfig call
     _lg.setLevel(logging.CRITICAL)
 
+import json
+
 import httpx
 import openai
-from livekit.agents import Agent, AgentSession, JobContext, WorkerOptions, cli, function_tool
+from livekit.agents import (
+    Agent,
+    AgentSession,
+    JobContext,
+    WorkerOptions,
+    cli,
+    function_tool,
+    get_job_context,
+)
 from livekit.plugins import deepgram, minimax, silero
+
+VIDEO_CONTROL_TOPIC = "video-control"
 
 logger = logging.getLogger("dental-agent")
 
@@ -35,9 +47,16 @@ When the user first joins:
 3. Ask if they have any specific questions already in mind
 Call save_user_intent() once you have a clear picture of their goals.
 
-You have two tools to use throughout the session:
+You have these tools to use throughout the session:
 - check_video_status(): call this to see whether the video has finished processing
 - search_video(): call this before answering any question about a specific moment or technique
+
+Video playback controls — call these whenever the user asks you to control the video:
+- play_video(): when they say "play", "resume", or "continue"
+- pause_video(): when they say "pause", "stop", or "hold on"
+- rewind_video(seconds): when they say "go back" or "rewind" (default 10 seconds)
+- forward_video(seconds): when they say "skip ahead" or "forward" (default 10 seconds)
+- seek_video(timestamp): when they say "jump to 42 seconds" or "go to one minute" (timestamp in seconds)
 
 Once the video is ready, switch to Q&A mode. Always call search_video() before answering procedure
 questions, and cite the timestamp in your response (e.g. "At 42 seconds...").
@@ -63,6 +82,55 @@ class DentalAgent(Agent):
             "Are you a student, resident, or clinician?",
             allow_interruptions=True,
         )
+
+    async def _send_video_command(self, command: dict) -> None:
+        """Publish a structured video-control command to the frontend over the
+        LiveKit data channel. The browser decodes it and drives the <video>."""
+        try:
+            room = get_job_context().room
+            await room.local_participant.publish_data(
+                json.dumps(command).encode("utf-8"),
+                reliable=True,
+                topic=VIDEO_CONTROL_TOPIC,
+            )
+            logger.info("Sent video command: %s", command)
+        except Exception as exc:
+            logger.error("Failed to send video command %s: %s", command, exc)
+
+    @function_tool()
+    async def play_video(self) -> str:
+        """Resume playback of the procedure video.
+        Use when the user says 'play', 'resume', or 'continue'."""
+        await self._send_video_command({"action": "play"})
+        return "Playing the video."
+
+    @function_tool()
+    async def pause_video(self) -> str:
+        """Pause the procedure video.
+        Use when the user says 'pause', 'stop', or 'hold on'."""
+        await self._send_video_command({"action": "pause"})
+        return "Paused the video."
+
+    @function_tool()
+    async def rewind_video(self, seconds: int = 10) -> str:
+        """Rewind the procedure video by a number of seconds (default 10).
+        Use when the user says 'go back' or 'rewind'."""
+        await self._send_video_command({"action": "rewind", "seconds": seconds})
+        return f"Rewound {seconds} seconds."
+
+    @function_tool()
+    async def forward_video(self, seconds: int = 10) -> str:
+        """Skip the procedure video forward by a number of seconds (default 10).
+        Use when the user says 'skip ahead' or 'forward'."""
+        await self._send_video_command({"action": "forward", "seconds": seconds})
+        return f"Skipped forward {seconds} seconds."
+
+    @function_tool()
+    async def seek_video(self, timestamp: float) -> str:
+        """Jump the procedure video to an absolute timestamp in seconds.
+        Use when the user says 'jump to 42 seconds' or 'go to one minute'."""
+        await self._send_video_command({"action": "seek", "timestamp": timestamp})
+        return f"Jumped to {timestamp:g} seconds."
 
     @function_tool()
     async def check_video_status(self) -> str:

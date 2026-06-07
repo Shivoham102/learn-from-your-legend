@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Lightbulb, Sparkles } from "lucide-react";
 import type { ChatMessage, UIAction } from "@/types/dental";
 import { getActionLabel } from "@/lib/uiActions";
+import type { VideoCommand } from "@/lib/videoControl";
 import KnowledgeCard from "./KnowledgeCard";
 import { VoiceAgent, type VoiceTurn } from "./VoiceAgent";
 
@@ -27,9 +28,11 @@ interface AITutorPanelProps {
   onSendMessage: (message: string) => void;
   isLoading?: boolean;
   highlightedTerms?: string[];
+  onRunDemo?: () => void;
   procedureCard?: ProcedureCardData | null;
   onCloseProcedureCard?: () => void;
   termCards?: TermCardData[];
+  onVideoControl?: (command: VideoCommand) => void;
 }
 
 export default function AITutorPanel({
@@ -40,6 +43,7 @@ export default function AITutorPanel({
   procedureCard,
   onCloseProcedureCard,
   termCards = [],
+  onVideoControl,
 }: AITutorPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [voiceTurns, setVoiceTurns] = useState<VoiceTurn[]>([]);
@@ -211,7 +215,7 @@ export default function AITutorPanel({
       </div>
 
       <div className="shrink-0 border-t border-[#E6ECEF] bg-[#F7FAF9] px-4 py-2">
-        <VoiceAgent onTurnsChange={setVoiceTurns} />
+        <VoiceAgent onTurnsChange={setVoiceTurns} onVideoControl={onVideoControl} />
       </div>
 
     </div>
