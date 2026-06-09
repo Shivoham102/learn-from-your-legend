@@ -32,6 +32,7 @@ interface DentalVideoPlayerProps {
   src?: string;
   onTimeUpdate?: (time: number) => void;
   onDurationChange?: (duration: number) => void;
+  onPlay?: () => void;
 }
 
 const PLAYBACK_SPEEDS = [0.75, 1, 1.25, 1.5] as const;
@@ -40,7 +41,7 @@ const DentalVideoPlayer = forwardRef<
   DentalVideoPlayerHandle,
   DentalVideoPlayerProps
 >(function DentalVideoPlayer(
-  { src = "/videos/dental-procedure-demo.mp4", onTimeUpdate, onDurationChange },
+  { src = "/videos/dental-procedure-demo.mp4", onTimeUpdate, onDurationChange, onPlay },
   ref
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -172,7 +173,11 @@ const DentalVideoPlayer = forwardRef<
                 videoRef.current.playbackRate = playbackSpeed;
               }
             }}
-            onPlay={() => setIsPlaying(true)}
+            onPlay={() => {
+              console.log("[video] play");
+              setIsPlaying(true);
+              onPlay?.();
+            }}
             onPause={() => setIsPlaying(false)}
             onError={() => setHasError(true)}
           />

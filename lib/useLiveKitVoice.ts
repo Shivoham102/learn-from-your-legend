@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Room, RoomEvent } from "livekit-client";
 import type { VoiceOrbState } from "@/components/VoiceOrb";
+import { getBrowserLiveKitIdentity } from "./liveKitIdentity";
+
+const DUPLICATE_IDENTITY_REASON = 2;
 
 interface UseLiveKitVoiceOptions {
   roomName?: string;
@@ -10,8 +13,8 @@ interface UseLiveKitVoiceOptions {
 }
 
 export function useLiveKitVoice({
-  roomName = "dental-tutor-room",
-  participantName = "student",
+  roomName,
+  participantName,
 }: UseLiveKitVoiceOptions = {}) {
   const roomRef = useRef<Room | null>(null);
   const connectingRef = useRef(false);
@@ -20,6 +23,9 @@ export function useLiveKitVoice({
 
   useEffect(() => {
     let cancelled = false;
+    const identity = getBrowserLiveKitIdentity();
+    const effectiveRoomName = roomName ?? identity.roomName;
+    const effectiveParticipantName = participantName ?? identity.identity;
 
     async function establishConnection() {
       if (connectingRef.current || roomRef.current || cancelled) return;
@@ -29,7 +35,10 @@ export function useLiveKitVoice({
         const res = await fetch("/api/livekit/token", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ roomName, participantName }),
+          body: JSON.stringify({
+            roomName: effectiveRoomName,
+            participantName: effectiveParticipantName,
+          }),
         });
 
         if (!res.ok) {
@@ -49,10 +58,14 @@ export function useLiveKitVoice({
         const room = new Room({ adaptiveStream: true, dynacast: true });
         roomRef.current = room;
 
-        room.on(RoomEvent.Disconnected, () => {
+        room.on(RoomEvent.Disconnected, (reason) => {
           roomRef.current = null;
           connectingRef.current = false;
           setVoiceState("listening");
+          if (Number(reason) === DUPLICATE_IDENTITY_REASON) {
+            setError("Duplicate tab detected — close other tabs or reconnect.");
+            return;
+          }
           if (!cancelled) {
             setTimeout(() => void establishConnection(), 2000);
           }

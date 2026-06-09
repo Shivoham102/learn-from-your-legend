@@ -4,14 +4,104 @@ import { getLiveKitConfig, isLiveKitConfigured } from "@/lib/livekit";
 
 export { isLiveKitConfigured };
 
-// Fast-path dedup: StrictMode fires useEffect twice in ~1ms — both requests arrive
-// before the agent joins, so the participant check below can't catch them.
-// This map blocks the second request synchronously.
-const lastDispatchedAt = new Map<string, number>();
-const DISPATCH_DEDUP_MS = 3_000;
+const AGENT_NAME = "dental-coach-red-test-1111";
+const DISPATCH_GUARD_MS = 15_000;
+const dispatchGuards = new Map<string, { expiresAt: number; promise: Promise<void> }>();
+
+function describeParticipants(participants: Awaited<ReturnType<RoomServiceClient["listParticipants"]>>) {
+  return participants.map((p) => ({
+    identity: p.identity,
+    sid: p.sid,
+    kind: (p as { kind?: number }).kind,
+    state: (p as { state?: number }).state,
+  }));
+}
+
+async function ensureAgentDispatched({
+  roomName,
+  httpUrl,
+  apiKey,
+  apiSecret,
+}: {
+  roomName: string;
+  httpUrl: string;
+  apiKey: string;
+  apiSecret: string;
+}) {
+  const now = Date.now();
+  const guard = dispatchGuards.get(roomName);
+  if (guard && guard.expiresAt > now) {
+    console.log("[dispatch] skipped — room dispatch guard active", {
+      roomName,
+      remainingMs: guard.expiresAt - now,
+    });
+    return guard.promise;
+  }
+
+  const promise = (async () => {
+    const dispatchClient = new AgentDispatchClient(httpUrl, apiKey, apiSecret);
+    const roomSvc = new RoomServiceClient(httpUrl, apiKey, apiSecret);
+    let participants: Awaited<ReturnType<RoomServiceClient["listParticipants"]>> = [];
+
+    try {
+      participants = await roomSvc.listParticipants(roomName);
+    } catch (error) {
+      console.log("[dispatch] participant list unavailable before dispatch", {
+        roomName,
+        error: error instanceof Error ? error.message : error,
+      });
+    }
+
+    const participantList = describeParticipants(participants);
+    const hasAgent = participantList.some((p) => p.kind === 4 && p.state !== 3);
+    console.log("[dispatch] participant list before dispatch", {
+      roomName,
+      participants: participantList,
+      hasAgent,
+    });
+
+    if (hasAgent) {
+      console.log("[dispatch] skipped — active agent already present", {
+        roomName,
+        agentName: AGENT_NAME,
+      });
+      return;
+    }
+
+    const dispatch = await dispatchClient.createDispatch(roomName, AGENT_NAME);
+    console.log("[dispatch] created", {
+      roomName,
+      agentName: dispatch.agentName,
+      dispatchId: (dispatch as { id?: string; dispatchId?: string }).id
+        ?? (dispatch as { id?: string; dispatchId?: string }).dispatchId
+        ?? null,
+    });
+  })();
+
+  dispatchGuards.set(roomName, {
+    expiresAt: now + DISPATCH_GUARD_MS,
+    promise,
+  });
+
+  try {
+    await promise;
+  } catch (error) {
+    dispatchGuards.delete(roomName);
+    console.error("[dispatch] failed", {
+      roomName,
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+}
 
 async function generateToken(roomName: string, participantName: string) {
   const { apiKey, apiSecret, url } = getLiveKitConfig();
+  console.log("[livekit/token] request", {
+    roomName,
+    participantName,
+    url,
+    configured: isLiveKitConfigured(),
+  });
 
   if (!isLiveKitConfigured()) {
     const mockToken = Buffer.from(
@@ -32,40 +122,16 @@ async function generateToken(roomName: string, participantName: string) {
   });
   at.addGrant({ room: roomName, roomJoin: true, canPublish: true, canSubscribe: true });
   const jwt = await at.toJwt();
+  console.log("[livekit/token] generated", {
+    roomName,
+    participantName,
+    url,
+  });
 
-  // Dispatch agent — fire-and-forget, double-dispatch guarded by two layers:
-  // 1. Timestamp dedup (synchronous): blocks StrictMode near-simultaneous requests
-  // 2. Participant check (async): skips dispatch if agent already alive in room
+  // Dispatch agent. The in-process guard is set before async LiveKit calls so rapid
+  // refreshes cannot race each other before the agent participant appears.
   const httpUrl = url.replace(/^wss?:\/\//, "https://");
-  const now = Date.now();
-  const last = lastDispatchedAt.get(roomName) ?? 0;
-  if (now - last <= DISPATCH_DEDUP_MS) {
-    console.log(`[dispatch] dedup skip (${now - last}ms ago)`);
-  } else {
-    lastDispatchedAt.set(roomName, now);
-    const dispatchClient = new AgentDispatchClient(httpUrl, apiKey, apiSecret);
-    const roomSvc = new RoomServiceClient(httpUrl, apiKey, apiSecret);
-    roomSvc
-      .listParticipants(roomName)
-      .then((participants) => {
-        // ParticipantInfo_Kind.AGENT === 4 in LiveKit proto (2 is EGRESS)
-        const hasAgent = participants.some((p) => (p as { kind?: number }).kind === 4);
-        console.log(`[dispatch] room=${roomName} participants=${participants.length} hasAgent=${hasAgent}`);
-        if (hasAgent) return;
-        return dispatchClient
-          .createDispatch(roomName, "dental-coach")
-          .then((d) => console.log("[dispatch] created:", d.agentName));
-      })
-      .catch(() => {
-        // Room doesn't exist yet — dispatch unconditionally
-        console.log("[dispatch] new room, dispatching");
-        dispatchClient.createDispatch(roomName, "dental-coach")
-          .then((d) => console.log("[dispatch] created:", d.agentName))
-          .catch((err: unknown) =>
-            console.error("[dispatch] failed:", err instanceof Error ? err.message : err),
-          );
-      });
-  }
+  await ensureAgentDispatched({ roomName, httpUrl, apiKey, apiSecret });
 
   return { token: jwt, serverUrl: url, url, mock: false, roomName, participantName };
 }
@@ -74,8 +140,8 @@ async function generateToken(roomName: string, participantName: string) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const roomName = searchParams.get("videoId") ?? "dental-tutor-room";
-    const participantName = searchParams.get("identity") ?? "user";
+    const roomName = searchParams.get("videoId") ?? "probeiq-local-server";
+    const participantName = searchParams.get("identity") ?? "user-local";
     return NextResponse.json(await generateToken(roomName, participantName));
   } catch (error) {
     console.error("[/api/livekit/token GET]", error);
@@ -85,7 +151,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { roomName = "dental-tutor-room", participantName = "student" } =
+    const { roomName = "probeiq-local-server", participantName = "user-local" } =
       await request.json();
     return NextResponse.json(await generateToken(roomName, participantName));
   } catch (error) {

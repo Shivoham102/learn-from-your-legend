@@ -33,7 +33,7 @@ interface AITutorPanelProps {
   onCloseProcedureCard?: () => void;
   termCards?: TermCardData[];
   onVideoControl?: (command: VideoCommand) => void;
-  onSendReady?: (sender: (payload: Record<string, unknown>) => void) => void;
+  onSendReady?: (sender: ((payload: Record<string, unknown>) => void) | null) => void;
   currentTime?: number;
 }
 

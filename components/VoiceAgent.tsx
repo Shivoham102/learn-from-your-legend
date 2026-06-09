@@ -7,6 +7,7 @@ import {
   useConnectionState,
   useDataChannel,
   useLocalParticipant,
+  useRoomContext,
   useTranscriptions,
   useVoiceAssistant,
 } from "@livekit/components-react";
@@ -18,6 +19,10 @@ import {
   VIDEO_CONTROL_TOPIC,
   type VideoCommand,
 } from "@/lib/videoControl";
+import { getBrowserLiveKitIdentity } from "@/lib/liveKitIdentity";
+
+const SPEECH_FALLBACK_TOPIC = "speech-fallback";
+const DUPLICATE_IDENTITY_REASON = 2;
 
 type ConnectionInfo = {
   token: string;
@@ -40,14 +45,32 @@ function VoiceSection({
 }: {
   onTurnsChange?: (turns: VoiceTurn[]) => void;
   onVideoControl?: (command: VideoCommand) => void;
-  onSendReady?: (sender: (payload: Record<string, unknown>) => void) => void;
+  onSendReady?: (sender: ((payload: Record<string, unknown>) => void) | null) => void;
   currentTime?: number;
 }) {
   const { state } = useVoiceAssistant();
   const { localParticipant } = useLocalParticipant();
+  const room = useRoomContext();
   const connectionState = useConnectionState();
   const isConnected = connectionState === ConnectionState.Connected;
   const allTranscriptions = useTranscriptions();
+
+  useEffect(() => {
+    console.log("[VoiceAgent/livekit] state", {
+      connectionState,
+      agentState: state,
+      localIdentity: localParticipant.identity,
+      remoteParticipantCount: room.remoteParticipants.size,
+      canPlaybackAudio: room.canPlaybackAudio,
+      audioContextState:
+        (room as unknown as { audioContext?: AudioContext }).audioContext
+          ?.state ?? "unknown",
+      agentParticipants:
+        Array.from(room.remoteParticipants.values())
+          .filter((p) => p.isAgent)
+          .map((p) => p.identity),
+    });
+  }, [connectionState, state, localParticipant, room]);
   // Publish current video timestamp to the room every 1s so the agent knows
   // which procedure segment is on screen. Fire-and-forget; drops are fine.
   const currentTimeRef = useRef(currentTime ?? 0);
@@ -72,13 +95,38 @@ function VoiceSection({
   // the mic on/off; nothing is published until the engine is connected.
   // Expose a stable sender so page.tsx can inject chip questions over the data channel.
   useEffect(() => {
-    if (!isConnected || !onSendReady) return;
+    if (!onSendReady) return;
+    if (!isConnected) {
+      onSendReady(null);
+      return;
+    }
     const enc = new TextEncoder();
     onSendReady((payload) => {
+      if (!isConnectedRef.current) {
+        console.warn("[VoiceAgent/data] publish skipped — disconnected", payload);
+        return;
+      }
+      if (payload.type === "narrate_segment") {
+        console.log("publishData narrate_segment start", payload);
+      }
+      console.log("[VoiceAgent/data] publish start", payload);
       localParticipant
         .publishData(enc.encode(JSON.stringify(payload)), { reliable: true })
-        .catch(() => {});
+        .then(() => {
+          if (payload.type === "narrate_segment") {
+            console.log("publishData narrate_segment ok", payload);
+          }
+          console.log("[VoiceAgent/data] publish ok", payload);
+        })
+        .catch((error) => {
+          console.warn("[VoiceAgent/data] publish failed", {
+            payload,
+            error,
+            message: error instanceof Error ? error.message : String(error),
+          });
+        });
     });
+    return () => onSendReady(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected]);
 
@@ -110,6 +158,25 @@ function VoiceSection({
     if (!command) return;
     console.log("[VoiceAgent] video-control received", command);
     onVideoControl?.(command);
+  });
+
+  useDataChannel(SPEECH_FALLBACK_TOPIC, (msg) => {
+    try {
+      const raw = new TextDecoder().decode(msg.payload);
+      const payload = JSON.parse(raw) as { text?: unknown; reason?: unknown };
+      const text = typeof payload.text === "string" ? payload.text.trim() : "";
+      if (!text || typeof window === "undefined" || !("speechSynthesis" in window)) {
+        return;
+      }
+      console.warn("[VoiceAgent] browser speech fallback", {
+        reason: payload.reason,
+        text,
+      });
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+    } catch (error) {
+      console.warn("[VoiceAgent] browser speech fallback failed", error);
+    }
   });
 
   // Track when each unique transcript text was first seen so createdAt is stable.
@@ -150,12 +217,12 @@ interface VoiceAgentProps {
   roomName?: string;
   onTurnsChange?: (turns: VoiceTurn[]) => void;
   onVideoControl?: (command: VideoCommand) => void;
-  onSendReady?: (sender: (payload: Record<string, unknown>) => void) => void;
+  onSendReady?: (sender: ((payload: Record<string, unknown>) => void) | null) => void;
   currentTime?: number;
 }
 
 export function VoiceAgent({
-  roomName = "dental-tutor-room",
+  roomName,
   onTurnsChange,
   onVideoControl,
   onSendReady,
@@ -163,24 +230,42 @@ export function VoiceAgent({
 }: VoiceAgentProps) {
   const [connectionInfo, setConnectionInfo] = useState<ConnectionInfo | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [duplicateIdentityMessage, setDuplicateIdentityMessage] = useState<string | null>(null);
+  const [sessionInfo, setSessionInfo] = useState<ReturnType<typeof getBrowserLiveKitIdentity> | null>(null);
 
   useEffect(() => {
+    setSessionInfo(getBrowserLiveKitIdentity());
+  }, []);
+
+  const effectiveRoomName = roomName ?? sessionInfo?.roomName;
+  const participantIdentity = sessionInfo?.identity;
+
+  useEffect(() => {
+    if (!effectiveRoomName || !participantIdentity) return;
     const ac = new AbortController();
+    setDuplicateIdentityMessage(null);
     fetch(
-      `/api/livekit/token?videoId=${encodeURIComponent(roomName)}&identity=student`,
+      `/api/livekit/token?videoId=${encodeURIComponent(effectiveRoomName)}&identity=${encodeURIComponent(participantIdentity)}`,
       { signal: ac.signal },
     )
       .then((r) => {
         if (!r.ok) throw new Error(`Token fetch failed: ${r.status}`);
         return r.json() as Promise<ConnectionInfo>;
       })
-      .then(setConnectionInfo)
+      .then((info) => {
+        console.log("[VoiceAgent] token fetched", {
+          roomName: effectiveRoomName,
+          participantIdentity,
+          serverUrl: info.serverUrl,
+        });
+        setConnectionInfo(info);
+      })
       .catch((e: unknown) => {
         if (e instanceof Error && e.name === "AbortError") return;
         setFetchError(e instanceof Error ? e.message : String(e));
       });
     return () => ac.abort();
-  }, [roomName]);
+  }, [effectiveRoomName, participantIdentity]);
 
   if (fetchError) {
     return (
@@ -188,7 +273,15 @@ export function VoiceAgent({
     );
   }
 
-  if (!connectionInfo) {
+  if (duplicateIdentityMessage) {
+    return (
+      <p className="text-center text-[10px] text-red-500">
+        {duplicateIdentityMessage}
+      </p>
+    );
+  }
+
+  if (!connectionInfo || !effectiveRoomName || !participantIdentity) {
     return <VoiceOrb state="listening" />;
   }
 
@@ -198,6 +291,35 @@ export function VoiceAgent({
       serverUrl={connectionInfo.serverUrl}
       audio={false}
       video={false}
+      onConnected={() => {
+        console.log("[VoiceAgent] room connected", {
+          roomName: effectiveRoomName,
+          participantIdentity,
+          serverUrl: connectionInfo.serverUrl,
+        });
+      }}
+      onDisconnected={(reason) => {
+        console.warn("[VoiceAgent] room disconnected", {
+          roomName: effectiveRoomName,
+          participantIdentity,
+          reason,
+        });
+        onSendReady?.(null);
+        if (Number(reason) === DUPLICATE_IDENTITY_REASON) {
+          setConnectionInfo(null);
+          setDuplicateIdentityMessage(
+            "Duplicate tab detected — close other tabs or reconnect."
+          );
+        }
+      }}
+      onError={(error) => {
+        console.error("[VoiceAgent] room connection error", {
+          roomName: effectiveRoomName,
+          participantIdentity,
+          serverUrl: connectionInfo.serverUrl,
+          message: error.message,
+        });
+      }}
     >
       <RoomAudioRenderer />
       <VoiceSection onTurnsChange={onTurnsChange} onVideoControl={onVideoControl} onSendReady={onSendReady} currentTime={currentTime} />

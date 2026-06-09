@@ -1,6 +1,7 @@
 livekit-agents>=1.0.0
 livekit-plugins-deepgram
 livekit-plugins-minimax
+livekit-plugins-openai
 livekit-plugins-silero
 httpx
 python-dotenv

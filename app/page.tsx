@@ -22,6 +22,7 @@ import {
   findSegmentByTime,
   PROCEDURE_DURATION,
   PROCEDURE_TIMELINE_MARKERS,
+  type ProcedureSegment,
 } from "@/lib/procedureData";
 import type { AIResponse, ChatMessage } from "@/types/dental";
 
@@ -187,6 +188,40 @@ export default function DentalEducationPage() {
     actionHandlers.onSeekVideo(timestamp);
   };
 
+  const handleVideoPlay = useCallback(() => {
+    const t = videoRef.current?.getCurrentTime() ?? currentTime;
+    const segment = findSegmentByTime(t) ?? null;
+    console.log("[narration-test] requestNarration called", {
+      currentTime: t,
+      segmentId: segment?.id ?? null,
+      stepName: segment?.step_name ?? null,
+      hasSender: Boolean(sendToAgentRef.current),
+    });
+
+    const serializeSegment = (seg: ProcedureSegment | null) =>
+      seg
+        ? {
+            id: seg.id,
+            step_name: seg.step_name,
+            phase: seg.phase,
+            context: seg.context,
+            start: seg.start,
+            end: seg.end,
+          }
+        : null;
+
+    if (!sendToAgentRef.current) {
+      console.warn("[narration-test] requestNarration skipped — no sender");
+      return;
+    }
+
+    sendToAgentRef.current({
+      type: "narrate_segment",
+      ts: t,
+      segment: serializeSegment(segment),
+    });
+  }, [currentTime]);
+
 
   return (
     <div className="relative min-h-screen bg-[#F7FAF9] text-[#1F2933]">
@@ -224,6 +259,7 @@ export default function DentalEducationPage() {
                 if (seg) setActiveStepId(seg.id);
               }}
               onDurationChange={setDuration}
+              onPlay={handleVideoPlay}
             />
 
             <VideoCommandChips
@@ -244,7 +280,9 @@ export default function DentalEducationPage() {
               onCloseProcedureCard={() => setProcedureCard(null)}
               termCards={termCards}
               onVideoControl={handleVideoControl}
-              onSendReady={(sender) => { sendToAgentRef.current = sender; }}
+              onSendReady={(sender) => {
+                sendToAgentRef.current = sender;
+              }}
               currentTime={currentTime}
             />
           </div>

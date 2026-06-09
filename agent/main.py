@@ -38,9 +38,7 @@ from livekit.agents import (
     get_job_context,
 )
 from livekit import rtc
-from livekit.agents import llm as _lk_llm
-from livekit.plugins import deepgram, minimax, silero
-from livekit.plugins.minimax import llm as _mm_llm
+from livekit.plugins import deepgram, minimax, openai as lk_openai, silero
 
 try:
     from moss import MossClient, QueryOptions
@@ -49,46 +47,126 @@ except ImportError:  # optional dependency — search_video degrades gracefully
     QueryOptions = None
 
 VIDEO_CONTROL_TOPIC = "video-control"
+SPEECH_FALLBACK_TOPIC = "speech-fallback"
 MOSS_INDEX_NAME = "dental_procedure"
 
 
-class _TolerantCompletionUsage(_lk_llm.CompletionUsage):
-    """MiniMax streams a trailing usage chunk with null token counts, which the
-    stock plugin feeds straight into CompletionUsage (int fields) and crashes
-    pydantic. Coerce the null counts to 0 so the stream completes."""
-
-    def __init__(self, **data):
-        for _k in ("completion_tokens", "prompt_tokens", "total_tokens"):
-            if data.get(_k) is None:
-                data[_k] = 0
-        super().__init__(**data)
-
-
-# Patch the class the minimax plugin resolves at call time (it does
-# `from livekit.agents import llm` then `llm.CompletionUsage(...)`).
-_lk_llm.CompletionUsage = _TolerantCompletionUsage
-
-
-# MiniMax rejects a tool call whose arguments are an empty string ("invalid
-# function arguments json string"). No-argument tools (e.g. get_current_segment)
-# serialize as "", so coerce empty tool-call arguments to "{}" before each request.
-_orig_to_chat_ctx = _mm_llm.to_chat_ctx
-
-
-def _patched_to_chat_ctx(chat_ctx, cache_key):
-    msgs = _orig_to_chat_ctx(chat_ctx, cache_key)
-    for m in msgs:
-        tool_calls = m.get("tool_calls") if isinstance(m, dict) else None
-        for tc in tool_calls or []:
-            fn = tc.get("function") if isinstance(tc, dict) else None
-            if isinstance(fn, dict) and not (fn.get("arguments") or "").strip():
-                fn["arguments"] = "{}"
-    return msgs
-
-
-_mm_llm.to_chat_ctx = _patched_to_chat_ctx
-
 logger = logging.getLogger("dental-agent")
+PIPELINE = "[pipeline]"
+QWEN_API_KEY = os.environ.get("QWEN_API_KEY") or os.environ.get("DASHSCOPE_API_KEY", "")
+QWEN_BASE_URL = os.environ.get(
+    "QWEN_BASE_URL",
+    os.environ.get(
+        "OPENAI_BASE_HTTP_API_URL",
+        "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+    ),
+)
+QWEN_MODEL = os.environ.get("QWEN_MODEL", "qwen-turbo")
+MINIMAX_API_KEY = os.environ.get("MINIMAX_API_KEY", "")
+MINIMAX_GROUP_ID = os.environ.get("MINIMAX_GROUP_ID", "")
+MINIMAX_TTS_BASE_URL = os.environ.get(
+    "MINIMAX_TTS_BASE_URL", "https://api.minimax.io/v1/t2a_v2"
+)
+
+
+def _mask_secret(value: str) -> str:
+    if not value:
+        return "missing"
+    if len(value) <= 12:
+        return "***"
+    return f"{value[:8]}...{value[-4:]}"
+
+
+async def _check_qwen_llm_auth() -> None:
+    client = openai.AsyncClient(api_key=QWEN_API_KEY, base_url=QWEN_BASE_URL)
+    try:
+        await client.chat.completions.create(
+            model=QWEN_MODEL,
+            messages=[{"role": "user", "content": "Reply OK."}],
+            max_tokens=2,
+        )
+        logger.info("%s Qwen LLM auth OK base_url=%s model=%s", PIPELINE, QWEN_BASE_URL, QWEN_MODEL)
+    except Exception as err:
+        logger.exception("%s Qwen LLM auth failed base_url=%s model=%s error=%s", PIPELINE, QWEN_BASE_URL, QWEN_MODEL, err)
+    finally:
+        await client.close()
+
+
+async def _check_minimax_tts_auth() -> None:
+    url = f"{MINIMAX_TTS_BASE_URL}?GroupId={MINIMAX_GROUP_ID}"
+    payload = {
+        "model": "speech-02-turbo",
+        "text": "OK",
+        "stream": True,
+        "language_boost": "auto",
+        "output_format": "hex",
+        "voice_setting": {
+            "voice_id": "presenter_female",
+            "speed": 1.0,
+            "vol": 1.0,
+            "pitch": 0,
+        },
+        "audio_setting": {
+            "sample_rate": 24000,
+            "bitrate": 128000,
+            "format": "pcm",
+        },
+    }
+    try:
+        async with httpx.AsyncClient(timeout=20) as client:
+            async with client.stream(
+                "POST",
+                url,
+                headers={
+                    "Authorization": f"Bearer {MINIMAX_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json=payload,
+            ) as response:
+                response.raise_for_status()
+                logger.info("%s TTS auth OK base_url=%s", PIPELINE, MINIMAX_TTS_BASE_URL)
+    except Exception as err:
+        logger.exception("%s TTS auth failed base_url=%s error=%s", PIPELINE, MINIMAX_TTS_BASE_URL, err)
+
+
+async def _log_llm_tts_startup_health() -> None:
+    logger.info(
+        "%s Qwen configured key=%s base_url=%s model=%s",
+        PIPELINE,
+        _mask_secret(QWEN_API_KEY),
+        QWEN_BASE_URL,
+        QWEN_MODEL,
+    )
+    logger.info(
+        "%s MiniMax TTS configured key=%s group_id=%s base_url=%s",
+        PIPELINE,
+        _mask_secret(MINIMAX_API_KEY),
+        _mask_secret(MINIMAX_GROUP_ID),
+        MINIMAX_TTS_BASE_URL,
+    )
+    if not QWEN_API_KEY:
+        logger.error("%s Qwen LLM auth failed — missing QWEN_API_KEY", PIPELINE)
+    else:
+        await _check_qwen_llm_auth()
+    if not MINIMAX_API_KEY or not MINIMAX_GROUP_ID:
+        logger.error("%s MiniMax auth failed — missing MINIMAX_API_KEY or MINIMAX_GROUP_ID", PIPELINE)
+        return
+    await _check_minimax_tts_auth()
+
+
+def _create_minimax_tts() -> minimax.TTS:
+    tts = minimax.TTS(
+        api_key=MINIMAX_API_KEY,
+        group_id=MINIMAX_GROUP_ID,
+        model="speech-02-turbo",
+        voice_id="presenter_female",
+        sample_rate=24000,
+    )
+    # The plugin default host rejects international keys; use the same host family
+    # as the MiniMax OpenAI-compatible LLM endpoint.
+    tts._opts.base_url = MINIMAX_TTS_BASE_URL
+    logger.info("%s TTS configured base_url=%s", PIPELINE, MINIMAX_TTS_BASE_URL)
+    return tts
 
 # MiniMax sometimes emits tool-call syntax as plain text instead of executing function calls.
 # Strip it before TTS via tts_text_transforms (runs first, before filter_markdown).
@@ -270,10 +348,14 @@ class DentalAgent(Agent):
         seg = _find_segment(self._current_time_s)
         if seg:
             self._last_announced_segment_id = seg.get("id")
-        await self.session.say(
+        logger.info("%s session.say start — greeting", PIPELINE)
+        handle = self.session.say(
             "Hi, I'm your dental study assistant. Ask me anything as you watch.",
             allow_interruptions=True,
         )
+        logger.info("%s session.say speech handle created — greeting id=%s", PIPELINE, handle.id)
+        await handle.wait_for_playout()
+        logger.info("%s audio playout completed — greeting", PIPELINE)
 
     async def on_user_turn_completed(self, turn_ctx: Any, new_message: Any) -> None:
         self._pre_question_time_s = self._current_time_s
@@ -290,6 +372,47 @@ class DentalAgent(Agent):
     def handle_interrupt(self) -> None:
         if self._loop:
             self._loop.create_task(self._do_interrupt())
+
+    def handle_narrate_segment(self, payload: dict) -> None:
+        logger.info("%s narrate_segment received payload=%r", PIPELINE, payload)
+        if self._loop is None:
+            logger.warning("%s narrate_segment skipped — no loop", PIPELINE)
+            return
+
+        ts = float(payload.get("ts", self._current_time_s))
+        self._current_time_s = ts
+        seg_payload = payload.get("segment")
+        if isinstance(seg_payload, dict) and seg_payload.get("step_name"):
+            seg = seg_payload
+        else:
+            seg = _find_segment(ts)
+
+        if not seg:
+            logger.warning("%s narrate_segment skipped — no segment ts=%.1f", PIPELINE, ts)
+            return
+
+        self._loop.create_task(self._speak_narration(seg))
+
+    async def _speak_narration(self, seg: dict) -> None:
+        step = seg.get("step_name", "")
+        context = seg.get("context", "")
+        phase = seg.get("phase", "")
+        try:
+            logger.info("%s Qwen LLM request started — narration step=%r", PIPELINE, step)
+            handle = self.session.generate_reply(
+                instructions=(
+                    f"The student pressed play on segment '{step}' (phase: {phase}). "
+                    f"Context: {context}. Narrate what is happening in 1-2 short "
+                    "plain-English sentences. No lists, no markdown, no timestamps."
+                ),
+                allow_interruptions=True,
+            )
+            self._announce_handle = handle
+            logger.info("%s session.say / speech handle created — narration id=%s", PIPELINE, handle.id)
+            await handle.wait_for_playout()
+            logger.info("%s audio playout completed — narration step=%r", PIPELINE, step)
+        except Exception:
+            logger.exception("%s narration LLM/TTS/playout failed — step=%r", PIPELINE, step)
 
     async def _do_interrupt(self) -> None:
         try:
@@ -405,6 +528,21 @@ class DentalAgent(Agent):
             logger.info("Sent video command: %s", command)
         except Exception as exc:
             logger.error("Failed to send video command %s: %s", command, exc)
+
+    async def _send_speech_fallback(self, text: str, reason: str) -> None:
+        if not text.strip():
+            return
+        try:
+            room = get_job_context().room
+            payload = {"type": "speech_fallback", "text": text, "reason": reason}
+            await room.local_participant.publish_data(
+                json.dumps(payload).encode("utf-8"),
+                reliable=True,
+                topic=SPEECH_FALLBACK_TOPIC,
+            )
+            logger.info("%s browser speech fallback sent reason=%s text=%r", PIPELINE, reason, text[:300])
+        except Exception as exc:
+            logger.error("%s browser speech fallback failed reason=%s error=%s", PIPELINE, reason, exc)
 
     @function_tool()
     async def play_video(self) -> str:
@@ -527,6 +665,7 @@ class DentalAgent(Agent):
 
 async def entrypoint(ctx: JobContext) -> None:
     await ctx.connect()
+    await _log_llm_tts_startup_health()
 
     video_id = ctx.room.name  # room name == videoId set by the token route
     next_url = os.environ.get("NEXT_URL", "http://localhost:3000")
@@ -535,8 +674,17 @@ async def entrypoint(ctx: JobContext) -> None:
 
     @ctx.room.on("data_received")
     def on_data(data_packet: rtc.DataPacket) -> None:
+        raw = ""
         try:
-            payload = json.loads(data_packet.data.decode())
+            raw = data_packet.data.decode(errors="replace")
+            logger.info(
+                "%s data_received raw=%r topic=%s from=%s",
+                PIPELINE,
+                raw[:1000],
+                data_packet.topic,
+                getattr(data_packet.participant, "identity", "?"),
+            )
+            payload = json.loads(raw)
             if payload.get("type") == "video_timestamp":
                 agent.update_timestamp(float(payload["ts"]))
             elif payload.get("type") == "user_interrupt":
@@ -545,24 +693,63 @@ async def entrypoint(ctx: JobContext) -> None:
                 question = str(payload.get("question", "")).strip()
                 if question:
                     agent.inject_text_question(question)
+            elif payload.get("type") == "narrate_segment":
+                agent.handle_narrate_segment(payload)
         except Exception:
-            pass
+            logger.exception("%s data_received handler error raw=%r", PIPELINE, raw[:1000])
 
     session = AgentSession(
         stt=deepgram.STT(model="nova-3", language="en-US"),
-        llm=minimax.LLM(
-            client=openai.AsyncClient(
-                api_key=os.environ.get("MINIMAX_API_KEY"),
-                base_url="https://api.minimax.io/v1",
-            )
+        llm=lk_openai.LLM(
+            model=QWEN_MODEL,
+            api_key=QWEN_API_KEY,
+            base_url=QWEN_BASE_URL,
         ),
-        tts=minimax.TTS(model="speech-02-turbo", voice_id="presenter_female", sample_rate=24000),
+        tts=_create_minimax_tts(),
         vad=silero.VAD.load(),
         tts_text_transforms=[_strip_leaked_calls, "filter_markdown"],
     )
+    last_agent_text = ""
+
+    @session.on("agent_state_changed")
+    def on_agent_state_changed(ev: Any) -> None:
+        logger.info("%s agent state — %s → %s", PIPELINE, ev.old_state, ev.new_state)
+        if ev.new_state == "thinking":
+            logger.info("%s Qwen LLM request started", PIPELINE)
+        if ev.new_state == "speaking":
+            logger.info("%s MiniMax TTS start", PIPELINE)
+        if ev.old_state == "speaking" and ev.new_state == "listening":
+            logger.info("%s MiniMax TTS end", PIPELINE)
+
+    @session.on("conversation_item_added")
+    def on_conversation_item_added(ev: Any) -> None:
+        nonlocal last_agent_text
+        item = ev.item
+        role = getattr(item, "role", None) or getattr(item, "type", "unknown")
+        text = getattr(item, "text_content", None) or getattr(item, "content", "")
+        text_s = str(text)
+        if role in {"assistant", "agent", "agent_handoff"} and text_s.strip():
+            last_agent_text = text_s
+        logger.info("%s Qwen LLM response text — role=%s text=%r", PIPELINE, role, text_s[:500])
+
+    @session.on("speech_created")
+    def on_speech_created(ev: Any) -> None:
+        logger.info(
+            "%s speech handle created — source=%s user_initiated=%s",
+            PIPELINE,
+            ev.source,
+            ev.user_initiated,
+        )
+
+    @session.on("error")
+    def on_session_error(ev: Any) -> None:
+        logger.error("%s session error — source=%s error=%r", PIPELINE, ev.source, ev.error, exc_info=getattr(ev.error, "error", ev.error))
+        source = str(getattr(ev, "source", "")).lower()
+        if "tts" in source or "synthesize" in source:
+            asyncio.create_task(agent._send_speech_fallback(last_agent_text, f"tts:{ev.source}"))
 
     await session.start(agent, room=ctx.room)
 
 
 if __name__ == "__main__":
-    cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint, agent_name="dental-coach"))
+    cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint, agent_name="dental-coach-red-test-1111"))
